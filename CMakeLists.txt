@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.20.2)
 project(webserv)
 
+add_compile_options(-Wall -Wextra -Werror -std=c++98)
+
 set(CMAKE_CXX_STANDARD 14)
 
 add_executable(webserv
