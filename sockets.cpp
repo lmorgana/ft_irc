@@ -14,11 +14,10 @@ void ft_print_vector(std::vector<T> vector)
 
 void EventSelector::Add(FdHandler *h)
 {
-	int i;
 	int fd = h->GetFd();
 	pollfd plf;
 
-	if (fd_array.empty() || fd_array.size() < fd)
+	if (fd_array.empty() || int(fd_array.size()) < fd)
 		fd_array.resize(fd + 1);
 	plf.fd = fd;
 	plf.events = POLLIN;
@@ -35,7 +34,7 @@ bool EventSelector::Remove(FdHandler *h)
 	int index = search_fd_poolfd(fd);
 
 	//needed to be modify
-	if(fd >= fd_array.size() || fd_array[fd] != h || index < 0)
+	if(fd >= int(fd_array.size()) || fd_array[fd] != h || index < 0)
 		return false;
 	fd_array[fd] = nullptr;
 
@@ -61,7 +60,7 @@ int	EventSelector::search_fd_poolfd(int fd)
 {
 	if (fd > 2)
 	{
-		for (int i = 0; i < poll_array.size(); i++)
+		for (int i = 0; i < int(poll_array.size()); i++)
 			if (poll_array[i].fd == fd)
 				return (i);
 	}
@@ -88,7 +87,7 @@ void EventSelector::Run()
 		int res = poll(iter.base(), poll_array.size(), 10000);
 		if (res < 0)
 		{
-			if (errno = EINTR)
+			if (errno == EINTR)
 				continue;
 			else
 				break;

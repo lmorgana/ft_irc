@@ -2,8 +2,8 @@
 #include "session.hpp"
 
 Session::Session(Server *a_master, int fd)
-		: FdHandler(fd, true), buf_used(0), ignoring(false),
-		  name(0), the_master(a_master), stat(READING)
+		: FdHandler(fd, true), stat(READING), buf_used(0), ignoring(false),
+		  name(0), the_master(a_master)
 {
 	//Send("Your name please: ");
 }
