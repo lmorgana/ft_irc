@@ -1,5 +1,5 @@
 NAME			= ft_irc
-SRCS			= main.cpp sockets.cpp  server.cpp session.cpp sockets.cpp
+SRCS			= main.cpp sockets.cpp  server.cpp session.cpp
 OBJS			= $(patsubst %.cpp, %.o, $(SRCS))
 HEADERS			= header.hpp sockets.hpp server.hpp session.hpp
 CC				= clang++
