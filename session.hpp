@@ -34,6 +34,7 @@ class Session : FdHandler {
 
 
 	virtual void Handle(bool r);
+	void send(const char *msg);
 
 };
 

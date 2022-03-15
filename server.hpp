@@ -22,7 +22,8 @@ public:
 	static Server *Start(EventSelector *sel, int port);
 
 	void RemoveSession(Session *s);
-//	void SendAll(const char *msg, Session *except = 0);
+	void sendAll(const char *msg, Session *except);
+
 
 private:
 	virtual void Handle(bool r);

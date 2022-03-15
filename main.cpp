@@ -3,7 +3,7 @@
 #include "server.hpp"
 #include "sockets.hpp"
 
-static int port = 7777;
+static int port = 6667;
 
 int main()
 {

@@ -80,3 +80,14 @@ void Server::Handle(bool r)
 	the_selector->Add(p->s);
 	std::cout << "*** someone connected with us ***" << std::endl;
 }
+
+void Server::sendAll(const char *msg, Session *except = nullptr)
+{
+	item *p;
+
+	for (p = first; p; p = p->next)
+	{
+		if (p->s != except)
+			p->s->send(msg);
+	}
+}
