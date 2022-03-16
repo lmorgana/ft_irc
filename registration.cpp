@@ -2,17 +2,18 @@
 #include <vector>
 #include <map>
 #include "Client.hpp"
+#include "Book.hpp"
 
 const std::string SERVER = "blueCat";
 
-class Book
-{
-public:
+// class Book
+// {
+// public:
 
-	Client* getClient(Session *current) {}
-	std::string	getPassword() {}
-	bool	checkNicknames(std::string nick) {}
-};
+// 	Client* getClient(Session *current) {}
+// 	std::string	getPassword() {}
+// 	bool	checkNicknames(std::string nick) {}
+// };
 
 struct returnRes
 {
@@ -125,6 +126,6 @@ returnRes*	checkData(Session* current, char* buf, Book* book)
 	if (resStr.empty())
 		res->msg = toCString(resStr);
 	res->users.push_back(current);
-	
+
 	return res;
 }
