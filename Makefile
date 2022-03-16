@@ -4,7 +4,7 @@ OBJS			= $(patsubst %.cpp, %.o, $(SRCS))
 HEADERS			= header.hpp sockets.hpp server.hpp session.hpp
 CC				= clang++
 RM				= rm -f
-FLAGS			= -Wall -Wextra -Werror -std=c++11
+FLAGS			= -Wall -Wextra -Werror -std=c++98
 
 %.o: %.cpp $(HEADERS)
 	$(CC) $(FLAGS) -c $< -o $@

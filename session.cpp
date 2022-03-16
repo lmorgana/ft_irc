@@ -20,20 +20,27 @@ void Session::Handle(bool r)
 	if (r)
 	{
 		int rc = read(GetFd(), buffer, sizeof(buffer));
-//		if (rc > 0)
-//		{	// still reading from fd
-//
-//		}
-//		else if (rc == 0)
-//		{
-//			// end of reading status
-//		}
-		if (rc == 0)
+		if (rc > 0)
 		{
-			the_master->RemoveSession(this);
+
+		}
+		else if (rc == 0)
+		{
+			the_master->RemoveSession(this, EXIT_MSG);
 			return ;
 		}
-//		std::cout << "\"" << buffer << "\"\nnumber of byte: " << rc << "\n------\n" << std::endl;
+		else
+		{	// -1 can't read
+//			std::cout << "something wrong with session" << std::endl;
+			the_master->RemoveSession(this, "*** server close session ***");
+			return ;
+		}
+//		std::cout << "------\n" << buffer << "number of byte: " << rc << "\n------\n" << std::endl;
 	}
 }
 
+void Session::send(char *msg)
+{
+	if (msg)
+		write(GetFd(), msg, sizeof(msg));
+}

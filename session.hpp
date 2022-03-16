@@ -10,7 +10,7 @@
 #define LIMIT_OF_BUFFER 3096
 
 enum {
-	max_line_length = 1023,
+	max_line_length = 512,
 	qlen_for_listen = 16
 };
 
@@ -34,7 +34,7 @@ class Session : FdHandler {
 
 
 	virtual void Handle(bool r);
-
+	void send(char *msg);
 };
 
 
