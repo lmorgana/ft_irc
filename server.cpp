@@ -79,3 +79,8 @@ void Server::Handle(bool r)
 	the_selector->Add(p->s);
 	std::cout << "*** someone connected with us ***" << std::endl;
 }
+
+Book *Server::getBook()
+{
+	return (&book);
+}

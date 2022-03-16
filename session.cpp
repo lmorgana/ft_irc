@@ -1,5 +1,7 @@
 
 #include "session.hpp"
+#include "registration.hpp"
+
 
 Session::Session(Server *a_master, int fd)
 		: FdHandler(fd, true), stat(READING), buf_used(0), ignoring(false),
@@ -16,13 +18,19 @@ Session::~Session()
 
 void Session::Handle(bool r)
 {
+	struct returnRes *result;
 	std::cout << "session: handle" << std::endl;
+
 	if (r)
 	{
 		int rc = read(GetFd(), buffer, sizeof(buffer));
 		if (rc > 0)
 		{
-
+//			std::cout << buffer << std::endl;
+			result = checkData(this, buffer, the_master->getBook());
+			result->users[0]->send(result->msg);
+//			std::cout << "\"" <<  result->msg << "\"" << std::endl;
+//			std::cout << strlen(result->msg) << std::endl;
 		}
 		else if (rc == 0)
 		{
@@ -39,8 +47,8 @@ void Session::Handle(bool r)
 	}
 }
 
-void Session::send(char *msg)
+void Session::send(const char *msg)
 {
 	if (msg)
-		write(GetFd(), msg, sizeof(msg));
+		write(GetFd(), msg, strlen(msg));
 }

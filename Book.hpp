@@ -4,7 +4,6 @@
 #include "header.hpp"
 #include "Client.hpp"
 
-
 class Book{
 	
 	private:

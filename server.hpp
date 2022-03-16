@@ -24,6 +24,7 @@ public:
 	static Server *Start(EventSelector *sel, int port, char *pass);
 
 	void RemoveSession(Session *s, const char *msg);
+	Book *getBook();
 
 private:
 	virtual void Handle(bool r);
