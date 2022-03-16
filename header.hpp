@@ -10,6 +10,10 @@
 #include "unistd.h"
 
 #include "poll.h"
+
+#include <string>
+#include <vector>
+
 static const char *EXIT_MSG = "*** someone leave us ***\n";
 
 #endif

@@ -12,4 +12,8 @@ add_executable(webserv
         server.cpp
         server.hpp
         session.cpp
-        session.hpp)
+        session.hpp
+        Book.cpp
+        Book.hpp
+        Client.cpp
+        Client.hpp)

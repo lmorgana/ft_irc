@@ -1,7 +1,9 @@
 
 #include "header.hpp"
-#include "server.hpp"
 #include "sockets.hpp"
+#include "server.hpp"
+#include "session.hpp"
+
 
 #define MAX_PORT 10000
 #define MIN_PORT 1023
@@ -37,7 +39,7 @@ int main(int argc, char** argv)
 		return (1);
 	}
 	EventSelector *selector = new EventSelector;
-	Server *serv = Server::Start(selector, port);
+	Server *serv = Server::Start(selector, port, argv[2]);
 	if(!serv) {
 		perror("server");
 		return 1;

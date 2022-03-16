@@ -1,10 +1,8 @@
+
 #include "Client.hpp"
 
-Client::Client(Session *session, std::string nick , std::string user, std ::string realName)
+Client::Client(Session *session)
 {
-    this->_nick = nick;
-    this->_user = user;
-    this->_realName = realName;
     this->_pass = false;
     this->_session = session;
 }

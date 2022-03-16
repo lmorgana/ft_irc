@@ -6,18 +6,16 @@
 #include "session.hpp"
 #include "Book.hpp"
 
-class Book;
-
 class Session;
 
 class Server : public FdHandler {
 	EventSelector	*the_selector;
-	Book			book;
 	struct item {
 		Session *s;
 		item *next;
 	};
 	item *first;
+	Book book;
 
 	Server(EventSelector *sel, int fd, char *pass);
 public:

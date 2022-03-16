@@ -2,9 +2,21 @@
 #define SOCKETS_HPP
 
 #include "header.hpp"
-#include <vector>
 
-class FdHandler;
+class FdHandler {
+	int fd;
+	bool own_fd;
+
+public:
+	FdHandler(int a_fd, bool own = true) : fd(a_fd), own_fd(own) {}
+	virtual ~FdHandler();
+	virtual void Handle(bool r) = 0;
+
+	int GetFd() const { return fd; }
+
+	virtual bool WantRead() const { return true; }
+	virtual bool WantWrite() const { return false; }
+};
 
 class EventSelector {
 	typedef std::vector<FdHandler*>::iterator iterator_handler;
@@ -28,21 +40,6 @@ public:
 
 private:
 	int	search_fd_poolfd(int fd);
-};
-
-class FdHandler {
-	int fd;
-	bool own_fd;
-
-public:
-	FdHandler(int a_fd, bool own = true) : fd(a_fd), own_fd(own) {}
-	virtual ~FdHandler();
-	virtual void Handle(bool r) = 0;
-
-	int GetFd() const { return fd; }
-
-	virtual bool WantRead() const { return true; }
-	virtual bool WantWrite() const { return false; }
 };
 
 #endif

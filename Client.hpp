@@ -1,9 +1,9 @@
 #ifndef Client_HPP
 #define Client_HPP
 
-#include <iostream>
-#include <string>
-#include "session.hpp"
+#include "header.hpp"
+
+ class Session;
 
  class Client
  {
@@ -17,7 +17,7 @@
 
     public:
 
-    Client(Session *session, std::string nick = "default", std::string user= "default", std ::string realName = "default");
+    Client(Session *session);
 
     void setNick(std::string nick);
     void setUser(std::string User);

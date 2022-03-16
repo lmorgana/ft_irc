@@ -1,11 +1,9 @@
 #ifndef BOOK_HPP
 #define BOOK_HPP
 
-#include <iostream>
-#include <string>
-#include <vector>
+#include "header.hpp"
 #include "Client.hpp"
-#include "session.hpp"
+
 
 class Book{
 	

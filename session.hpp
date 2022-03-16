@@ -1,9 +1,9 @@
 #ifndef WEBSERV_SESSION_HPP
 #define WEBSERV_SESSION_HPP
 
-#include "server.hpp"
-#include "sockets.hpp"
 #include "header.hpp"
+#include "sockets.hpp"
+#include "server.hpp"
 
 #define READING 0
 #define WRITING 1
