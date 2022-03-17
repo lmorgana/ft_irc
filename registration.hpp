@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include <iterator>
+#include <ctype.h>
 
 const std::string SERVER = "blueCat";
 
@@ -79,6 +80,90 @@ std::vector<std::string>	ft_split(std::string s, char c)
 	return res;
 }
 
+struct returnRes*	nickMethod(Book* book, struct returnRes* res,
+								Client* curClient, std::vector<std::string> words)
+{
+	if (words.size() == 1)
+		res->msg = toCString("431 :No nickname given");
+	else
+	{
+		if (!book->checkNicknames(words[1]))
+		{
+			int flag = 0;
+			for (size_t i = 0; i < words[1].size(); i++)
+			{
+				if (isalnum(words[1][i]) || words[1][i] == '-'
+					|| (words[1][i] >= '[' && words[1][i] <= '^')
+					|| words[1][i] == '{' || words[1][i] == '}')
+					continue ;
+				else
+				{
+					flag = 1;
+					break ;
+				}
+			}
+			if (flag || words[1].size() > 9)
+				res->msg = toCString("432 " + words[1] + " :Erroneus nickname");
+			else
+				curClient->setNick(words[1]);
+		}
+		else
+			res->msg = toCString("433 " + words[1] + " :Nickname is already in use");
+	}
+	return res;
+}
+
+struct returnRes*	userMethod(struct returnRes* res, Client* curClient,
+								std::vector<std::string> words)
+{
+	if (!curClient->getUser().empty())
+		res->msg = toCString("462 :You may not reregister");
+	else
+	{
+		if (words.size() < 5)
+			res->msg = toCString("461 USER :Not enough parameters");
+		else
+		{
+			curClient->setUser(words[1]);
+			if (words[4][0] == ':')
+				curClient->setRealName(words[4].substr(1, words[4].size() - 1));
+		}
+	}
+	return res;
+}
+
+struct returnRes*	passMethod(Book* book, struct returnRes* res,
+								Client* curClient, std::vector<std::string> words)
+{
+	if (words[0] == "PASS")
+	{
+		if (words.size() == 1)
+			res->msg = toCString("461 PASS :Not enough parameters");
+		else
+		{
+			if (words[1] == book->getPassword())
+				curClient->setPass();
+		}
+	}
+	else
+		res->msg = toCString("451 :" + SERVER + " :You have not registered");
+	return res;
+}
+
+struct returnRes*	privMsgMethod(Book* book, struct returnRes* res,
+								Client* curClient, std::vector<std::string> words)
+{
+	std::string	privMsg;
+	std::vector<std::string> nicks;
+
+	if (words.size() < 3)
+		res->msg = toCString("412 :No text to send");
+	else
+	{
+		nicks = ft_split(words[1], ',');
+	}
+}
+
 struct returnRes*	checkData(Session* current, char* buf, Book* book, struct returnRes* res)
 {
 	std::string str = buf;
@@ -91,35 +176,9 @@ struct returnRes*	checkData(Session* current, char* buf, Book* book, struct retu
 		if (words[0] == "PASS")
 			res->msg = toCString("462 :You may not reregister");
 		else if (words[0] == "NICK")
-		{
-			// words = ft_split(str, ' ');
-			if (words.size() == 1)
-				res->msg = toCString("431 :No nickname given");
-			else
-			{
-				if (!book->checkNicknames(words[1]))
-					curClient->setNick(words[1]);
-				else
-					res->msg = toCString("433 " + words[1] + " :Nickname is already in use");
-			}
-		}
+			res = nickMethod(book, res, curClient, words);
 		else if (words[0] == "USER" && curClient->getUser().empty())
-		{
-			if (!curClient->getUser().empty())
-				res->msg = toCString("462 :You may not reregister");
-			else
-			{
-				// words = ft_split(str, ' ');
-				if (words.size() < 5)
-					res->msg = toCString("461 USER :Not enough parameters");
-				else
-				{
-					curClient->setUser(words[1]);
-					if (words[4][0] == ':')
-						curClient->setRealName(words[4].substr(1, words[4].size() - 1));
-				}
-			}
-		}
+			res = userMethod(res, curClient, words);
 		else
 			res->msg = toCString("451 :" + SERVER + " :You have not registered");
 		if (!curClient->getUser().empty() && !curClient->getNick().empty())
@@ -130,21 +189,21 @@ struct returnRes*	checkData(Session* current, char* buf, Book* book, struct retu
 			res->msg = toCString(res->msg);
 		}
 	}
-	else
+	//TODO change to method which if user is registered
+	else if (curClient->getPass() && !curClient->getUser().empty() && !curClient->getNick().empty())
 	{
-		if (words[0] == "PASS")
-		{
-			if (words.size() == 1)
-				res->msg = toCString("461 PASS :Not enough parameters");
-			else
-			{
-				if (words[1] == book->getPassword())
-					curClient->setPass();
-			}
-		}
-		else
-			res->msg = toCString("451 :" + SERVER + " :You have not registered");
+		if (words[0] == "NICK")
+			res = nickMethod(book, res, curClient, words);
+		else if (words[0] == "PRIVMSG")
+		{}
+		// else if (words[0][0] == ':' && words[1] == "PRIVMSG" && words.size() >= 4
+		// 		&& book->checkNicknames(words[0].substr(1, words[0].length() - 1)))
+		// {
+			
+		// }
 	}
+	else
+		res = passMethod(book, res, curClient, words);
 
 	res->users.push_back(current);
 
