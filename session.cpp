@@ -19,7 +19,7 @@ Session::~Session()
 
 void Session::Handle(bool r)
 {
-	struct returnRes *result;
+	struct returnRes *result = new struct returnRes;
 	std::cout << "session: handle" << std::endl;
 
 	if (r)
@@ -27,14 +27,8 @@ void Session::Handle(bool r)
 		int rc = read(GetFd(), buffer, sizeof(buffer));
 		if (rc > 0)
 		{
-//			std::cout << buffer << std::endl;
-			result = checkData(this, buffer, the_master->getBook());
-			std::cout << "KKKK\n";
-			std::cout << result->msg << std::endl;
-			std::cout << "\"0|" <<  result->msg << "\"" << std::endl;
-			result->users[0]->send(result->msg);
-			std::cout << "\"1|" <<  result->msg << "\"" << std::endl;
-//			std::cout << strlen(result->msg) << std::endl;
+			result = checkData(this, buffer, the_master->getBook(), result);
+			result->users[0]->send(result->msg.c_str());
 		}
 		else if (rc == 0)
 		{
