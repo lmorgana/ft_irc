@@ -17,4 +17,6 @@ add_executable(webserv
         Book.hpp
         Client.cpp
         Client.hpp
-        registration.hpp)
+        registration.hpp
+        Channel.cpp
+        Channel.hpp)
