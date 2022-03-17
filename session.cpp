@@ -23,8 +23,9 @@ void Session::Handle(bool r)
 		int rc = read(GetFd(), buffer, sizeof(buffer));
 		if (rc > 0)
 		{
-			result = checkData(this, buffer, the_master->getBook(), result);
-			result->users[0]->send(result->msg.c_str());
+//			result = checkData(this, buffer, the_master->getBook(), result);
+//			result->users[0]->send(result->msg.c_str());
+			std::cout << buffer << std::endl;
 		}
 		else if (rc == 0)
 		{

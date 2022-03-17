@@ -163,6 +163,7 @@ struct returnRes*	privMsgMethod(Book* book, struct returnRes* res,
 	else
 	{
 		nicks = ft_split(words[1], ',');
+		std::cout << nicks[0] << std::endl;
 	}
 	return (res);
 }
