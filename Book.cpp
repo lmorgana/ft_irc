@@ -19,6 +19,16 @@ Client * Book::getClient(Session *session)
     }
     return NULL;
 }
+Session * Book::getSession(std::string nick)
+{
+    size_t size = clients.size();
+    for (size_t i = 0; i < size;i++)
+    {
+        if (nick == clients[i]->getNick())
+            return  clients[i]->getSession();
+    }
+    return static_cast <Session *>(0);
+}
 
 size_t Book::size()
 {

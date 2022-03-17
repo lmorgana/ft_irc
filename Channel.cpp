@@ -23,7 +23,7 @@ std::vector<Client *> Channel::getClients()
 void Channel::kickClient(Client *client)
 {
     size_t size = clients.size();
-    size_t index = -1;
+    int index = -1;
     for (size_t i = 0; i < size; i++)
     {
         if (clients[i] == client)

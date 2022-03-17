@@ -28,7 +28,7 @@ void Client::setPass()
     _pass = true;
 }
 
- void setAuthorized()
+ void Client::setAuthorized()
  {
      _authorized = true;
  }

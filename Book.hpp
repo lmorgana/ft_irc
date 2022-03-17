@@ -4,6 +4,10 @@
 #include "header.hpp"
 #include "Client.hpp"
 #include <vector>
+#include "Channel.hpp"
+
+class Session;
+class Channel;
 
 class Book{
 	
@@ -16,6 +20,7 @@ class Book{
 
     Book(char *password);
     Client *getClient(Session *session);
+    Session * getSession(std::string nick);
     bool searchBySession(Session *session);
     std::string getPassword();
     bool checkNicknames(std::string nick);
