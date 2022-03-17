@@ -5,7 +5,7 @@ add_compile_options(-Wall -Wextra -Werror -std=c++98)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(irc_server
+add_executable(webserver
         main.cpp
         sockets.cpp
         sockets.hpp

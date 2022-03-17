@@ -153,6 +153,8 @@ struct returnRes*	passMethod(Book* book, struct returnRes* res,
 struct returnRes*	privMsgMethod(Book* book, struct returnRes* res,
 								Client* curClient, std::vector<std::string> words)
 {
+	(void) book;
+	(void) curClient;
 	std::string	privMsg;
 	std::vector<std::string> nicks;
 
@@ -162,6 +164,7 @@ struct returnRes*	privMsgMethod(Book* book, struct returnRes* res,
 	{
 		nicks = ft_split(words[1], ',');
 	}
+	return (res);
 }
 
 struct returnRes*	checkData(Session* current, char* buf, Book* book, struct returnRes* res)
