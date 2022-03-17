@@ -17,7 +17,7 @@ void EventSelector::Add(FdHandler *h)
 	int fd = h->GetFd();
 	pollfd plf;
 
-	if (fd_array.empty() || int(fd_array.size()) < fd)
+	if (fd_array.empty() || int(fd_array.size()) < fd + 1)
 		fd_array.resize(fd + 1);
 	plf.fd = fd;
 	plf.events = POLLIN;
