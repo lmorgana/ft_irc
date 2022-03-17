@@ -35,7 +35,10 @@ struct returnRes
 
 const char*	toCString(std::string str)
 {
-	str += "\r\n";
+	if (!str.empty())
+		str += "\r\n";
+	else
+		str += "\r";
 	return str.c_str();
 }
 
@@ -50,12 +53,15 @@ returnRes*	checkData(Session* current, char* buf, Book* book)
 	std::string	dataFromStr;
 	
 	//delete \r\n from the end
+	std::cout << "buf " << buf << "|" << std::endl;
+	std::cout << "str0 " << str << "|" << std::endl;
 	str = str.substr(0, str.length() - 1);
+	std::cout << "str1 " << str << "|" << std::endl;
 	int i = 0;
 	if (curClient->getPass())
 	{
 		if (str.substr(0, 4) == "PASS")
-			res->msg = toCString("461 PASS :Not enough parameters");
+			res->msg = toCString("462 :You may not reregister");
 		else if (str.substr(0, 4) == "NICK")
 		{
 			i = 4;
@@ -63,12 +69,15 @@ returnRes*	checkData(Session* current, char* buf, Book* book)
 				i++;
 			if (!str[i])
 				res->msg = toCString("431 :No nickname given");
-			for (int j = 0; str[i] || str[i] == ' '; j++, i++)
-				dataFromStr[j] = str[i];
-			if (!book->checkNicknames(dataFromStr))
-				curClient->setNick(dataFromStr);
 			else
-				res->msg = toCString("433 " + dataFromStr + " :Nickname is already in use");
+			{
+				for (; str[i] || str[i] == ' '; i++)
+					dataFromStr += str[i];
+				if (!book->checkNicknames(dataFromStr))
+					curClient->setNick(dataFromStr);
+				else
+					res->msg = toCString("433 " + dataFromStr + " :Nickname is already in use");
+			}
 		}
 		else if (str.substr(0, 4) == "USER")
 		{
@@ -79,21 +88,21 @@ returnRes*	checkData(Session* current, char* buf, Book* book)
 				i = 4;
 				while (str[i] == ' ')
 					i++;
-				for (int j = 0; str[i] || str[i] == ' '; j++, i++)
-					dataFromStr[j] = str[i];
+				for (; str[i] || str[i] == ' '; i++)
+					dataFromStr += str[i];
 				if (!str[i])
 					res->msg = toCString("461 USER :Not enough parameters");
-				for (int j = 0; str[i] || str[i] == ' '; j++, i++);
+				for (; str[i] || str[i] == ' '; i++);
 				if (!str[i])
 					res->msg = toCString("461 USER :Not enough parameters");
-				for (int j = 0; str[i] || str[i] == ' '; j++, i++);
+				for (; str[i] || str[i] == ' '; i++);
 				if (str[i] && str[i] == ':' && str[i + 1])
 				{
 					i++;
 					curClient->setUser(dataFromStr);
 					dataFromStr = "";
-					for (int j = 0; str[i]; j++, i++)
-						dataFromStr[j] = str[i];
+					for (; str[i]; i++)
+						dataFromStr += str[i];
 					curClient->setRealName(dataFromStr);
 				}
 				else
@@ -110,9 +119,8 @@ returnRes*	checkData(Session* current, char* buf, Book* book)
 				i++;
 			if (!str[i])
 				res->msg = toCString("461 PASS :Not enough parameters");
-			for (int j = 0; str[i] || str[i] == ' '; j++, i++)
+			for (; str[i] || str[i] == ' '; i++)
 				dataFromStr += str[i];
-			std::cout << "dataFromStr " << dataFromStr << std::endl;
 			if (dataFromStr == book->getPassword())
 				curClient->setPass();
 		}
@@ -124,9 +132,13 @@ returnRes*	checkData(Session* current, char* buf, Book* book)
 		// 	res->msg = resStr.c_str();
 		// }
 	}
-	if (!res->msg || res->msg[0] == '\0')
+	if (!res->msg)
 		res->msg = toCString(resStr);
 	res->users.push_back(current);
+
+	std::cout << "Pass " << curClient->getPass() << std::endl;
+	std::cout << "Nick " << curClient->getNick() << std::endl;
+	std::cout << "User " << curClient->getUser() << std::endl;
 
 	return res;
 }

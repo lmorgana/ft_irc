@@ -1,6 +1,7 @@
 
 #include "session.hpp"
 #include "registration.hpp"
+#include <cstring>
 
 
 Session::Session(Server *a_master, int fd)
@@ -28,8 +29,11 @@ void Session::Handle(bool r)
 		{
 //			std::cout << buffer << std::endl;
 			result = checkData(this, buffer, the_master->getBook());
+			std::cout << "KKKK\n";
+			std::cout << result->msg << std::endl;
+			std::cout << "\"0|" <<  result->msg << "\"" << std::endl;
 			result->users[0]->send(result->msg);
-//			std::cout << "\"" <<  result->msg << "\"" << std::endl;
+			std::cout << "\"1|" <<  result->msg << "\"" << std::endl;
 //			std::cout << strlen(result->msg) << std::endl;
 		}
 		else if (rc == 0)
@@ -44,6 +48,8 @@ void Session::Handle(bool r)
 			return ;
 		}
 //		std::cout << "------\n" << buffer << "number of byte: " << rc << "\n------\n" << std::endl;
+		bzero(buffer, strlen(buffer));
+		delete result;
 	}
 }
 
