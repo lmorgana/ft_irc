@@ -27,7 +27,7 @@ class Book{
     size_t size();
 
     void joinClientChannel(std::string name, Client *client);
-    void kickClientChannel(std::string name, Client *client);
+    bool kickClientChannel(std::string name, Client *client);
     std::vector<Client *> * getClientsChannel(std::string name); 
 
     ~Book();

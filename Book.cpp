@@ -89,14 +89,15 @@ void Book::joinClientChannel(std::string name, Client *client)
             channels[i]->addClient(client);
     }
 }
-void Book::kickClientChannel(std::string name, Client *client)
+bool Book::kickClientChannel(std::string name, Client *client)
 {
     size_t size = channels.size();
     for(size_t i = 0; i < size; i++)
     {
         if (name == channels[i]->getName())
-            channels[i]->kickClient(client);
+            return channels[i]->kickClient(client);
     }
+    return false;
 }
 std::vector<Client *> * Book::getClientsChannel(std::string name)
 {
