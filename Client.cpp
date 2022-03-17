@@ -4,6 +4,7 @@
 Client::Client(Session *session)
 {
     this->_pass = false;
+    this->_authorized = false;
     this->_session = session;
 }
 
@@ -26,3 +27,8 @@ void Client::setPass()
 {
     _pass = true;
 }
+
+ void setAuthorized()
+ {
+     _authorized = true;
+ }

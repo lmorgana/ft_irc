@@ -11,7 +11,8 @@
 #include <unistd.h>
 
 #include <poll.h>
-
+#include "Channel.hpp"
+#include "Book.hpp"
 #include <string>
 #include <vector>
 

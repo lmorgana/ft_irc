@@ -60,3 +60,41 @@ bool Book::checkNicknames(std::string nick)
     }
     return (false);
 }
+
+void Book::joinClientChannel(std::string name, Client *client)
+{
+    size_t size = channels.size();
+    bool flag = true;
+    for(size_t i = 0; i < size; i++)
+    {
+        if (name == channels[i]->getName())
+            flag = false;
+    }
+    if (flag)
+        channels.push_back(new Channel(name));
+    size = channels.size();
+    for(size_t i = 0; i < size; i++)
+    {
+        if (name == channels[i]->getName())
+            channels[i]->addClient(client);
+    }
+}
+void Book::kickClientChannel(std::string name, Client *client)
+{
+    size_t size = channels.size();
+    for(size_t i = 0; i < size; i++)
+    {
+        if (name == channels[i]->getName())
+            channels[i]->kickClient(client);
+    }
+}
+std::vector<Client *> Book::getClientsChannel(std::string name)
+{
+    size_t size = channels.size();
+    for(size_t i = 0; i < size; i++)
+    {
+        if (name == channels[i]->getName())
+            return channels[i]->getClients();
+    }
+    return static_cast<std::vector<Client *> >(0);
+}

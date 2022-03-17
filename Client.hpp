@@ -14,6 +14,7 @@
     std::string _realName;
     Session     *_session;
     bool        _pass;
+    bool        _authorized;
 
     public:
 
@@ -23,7 +24,9 @@
     void setUser(std::string User);
     void setRealName(std::string realName);
     void setPass();
+    void setAuthorized();
 
+    void getAuthorized(return _authorized);
     bool getPass() const {return _pass;}
     std::string getNick() const {return _nick;}
     std::string getUser() const {return _user;}
