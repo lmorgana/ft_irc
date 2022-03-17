@@ -4,6 +4,11 @@
 #include "Client.hpp"
 #include "Book.hpp"
 
+#include <sstream>
+#include <string>
+#include <vector>
+#include <iterator>
+
 const std::string SERVER = "blueCat";
 
 // class Book
@@ -17,7 +22,7 @@ const std::string SERVER = "blueCat";
 
 struct returnRes
 {
-	const char*				msg;
+	std::string				msg;
 	std::vector<Session*>	users;
 
 };
@@ -33,100 +38,120 @@ struct returnRes
 // 	return error;
 // }
 
-const char*	toCString(std::string str)
+std::string	toCString(std::string str)
 {
-	str += "\r\n";
-	return str.c_str();
+	if (!str.empty())
+		str += "\r\n";
+	// else
+	// 	str += ' ';
+	return str;
 }
 
-returnRes*	checkData(Session* current, char* buf, Book* book)
+int	l_len(std::string s, char c, int i)
+{
+	int	len;
+
+	len = 0;
+	while (s[i + len] != c && s[i + len])
+		len++;
+	return len;
+}
+
+std::vector<std::string>	ft_split(std::string s, char c)
+{
+	std::vector<std::string>	res;
+	std::string					tmp;
+
+	int i = 0;
+	while (s[i])
+	{
+		while (s[i] == c && s[i])
+			i++;
+		if (!s[i])
+			break ;
+		for (int k = 0; k < l_len(s, c, i); k++)
+			tmp += s[i + k];
+		res.push_back(tmp);
+		tmp.clear();
+		while (s[i] != c && s[i])
+			i++;
+	}
+	return res;
+}
+
+struct returnRes*	checkData(Session* current, char* buf, Book* book, struct returnRes* res)
 {
 	std::string str = buf;
-	// std::map<std::string, std::string> errorBook = errorMsg(book, str);
-	// std::map<std::string, std::string>::iterator it;
-	Client*	curClient = book->getClient(current);
-	returnRes*	res = new returnRes;
-	std::string	resStr;
-	std::string	dataFromStr;
-	
-	//delete \r\n from the end
 	str = str.substr(0, str.length() - 1);
-	int i = 0;
-	if (curClient->getPass())
+	Client*	curClient = book->getClient(current);
+	std::vector<std::string> words = ft_split(str, ' ');
+	
+	if (curClient->getPass() && (curClient->getUser().empty() || curClient->getNick().empty()))
 	{
-		if (str.substr(0, 4) == "PASS")
-			res->msg = toCString("461 PASS :Not enough parameters");
-		else if (str.substr(0, 4) == "NICK")
+		if (words[0] == "PASS")
+			res->msg = toCString("462 :You may not reregister");
+		else if (words[0] == "NICK")
 		{
-			i = 4;
-			while (str[i] == ' ')
-				i++;
-			if (!str[i])
+			// words = ft_split(str, ' ');
+			if (words.size() == 1)
 				res->msg = toCString("431 :No nickname given");
-			for (int j = 0; str[i] || str[i] == ' '; j++, i++)
-				dataFromStr[j] = str[i];
-			if (!book->checkNicknames(dataFromStr))
-				curClient->setNick(dataFromStr);
 			else
-				res->msg = toCString("433 " + dataFromStr + " :Nickname is already in use");
+			{
+				if (!book->checkNicknames(words[1]))
+					curClient->setNick(words[1]);
+				else
+					res->msg = toCString("433 " + words[1] + " :Nickname is already in use");
+			}
 		}
-		else if (str.substr(0, 4) == "USER")
+		else if (words[0] == "USER" && curClient->getUser().empty())
 		{
 			if (!curClient->getUser().empty())
 				res->msg = toCString("462 :You may not reregister");
 			else
 			{
-				i = 4;
-				while (str[i] == ' ')
-					i++;
-				for (int j = 0; str[i] || str[i] == ' '; j++, i++)
-					dataFromStr[j] = str[i];
-				if (!str[i])
+				// words = ft_split(str, ' ');
+				if (words.size() < 5)
 					res->msg = toCString("461 USER :Not enough parameters");
-				for (int j = 0; str[i] || str[i] == ' '; j++, i++);
-				if (!str[i])
-					res->msg = toCString("461 USER :Not enough parameters");
-				for (int j = 0; str[i] || str[i] == ' '; j++, i++);
-				if (str[i] && str[i] == ':' && str[i + 1])
-				{
-					i++;
-					curClient->setUser(dataFromStr);
-					dataFromStr = "";
-					for (int j = 0; str[i]; j++, i++)
-						dataFromStr[j] = str[i];
-					curClient->setRealName(dataFromStr);
-				}
 				else
-					res->msg = toCString("461 USER :Not enough parameters");
+				{
+					curClient->setUser(words[1]);
+					if (words[4][0] == ':')
+						curClient->setRealName(words[4].substr(1, words[4].size() - 1));
+				}
 			}
+		}
+		else
+			res->msg = toCString("451 :" + SERVER + " :You have not registered");
+		if (!curClient->getUser().empty() && !curClient->getNick().empty())
+		{
+			res->msg += "375 :- " + SERVER + " Message of the day - \n";
+			res->msg += "372 :- Welcome to our server!\n";
+			res->msg += "376 :End of /MOTD command";
+			res->msg = toCString(res->msg);
 		}
 	}
 	else
 	{
-		if (str.substr(0, 4) == "PASS")
+		if (words[0] == "PASS")
 		{
-			i = 4;
-			while (str[i] == ' ')
-				i++;
-			if (!str[i])
+			if (words.size() == 1)
 				res->msg = toCString("461 PASS :Not enough parameters");
-			for (int j = 0; str[i] || str[i] == ' '; j++, i++)
-				dataFromStr += str[i];
-			std::cout << "dataFromStr " << dataFromStr << std::endl;
-			if (dataFromStr == book->getPassword())
-				curClient->setPass();
+			else
+			{
+				if (words[1] == book->getPassword())
+					curClient->setPass();
+			}
 		}
 		else
 			res->msg = toCString("451 :" + SERVER + " :You have not registered");
-		// {
-		// 	it = errorbook->find("451");
-		// 	resStr = ":" + SERVER + it->first + "  :" + it->second + "\r\n";
-		// 	res->msg = resStr.c_str();
-		// }
 	}
-	if (!res->msg || res->msg[0] == '\0')
-		res->msg = toCString(resStr);
+
 	res->users.push_back(current);
+
+	std::cout << "Pass: " << curClient->getPass() << std::endl;
+	std::cout << "Nick: " << curClient->getNick() << std::endl;
+	std::cout << "User: " << curClient->getUser() << std::endl;
+	std::cout << "Name: " << curClient->getRealName() << std::endl;
 
 	return res;
 }
