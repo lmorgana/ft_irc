@@ -83,7 +83,7 @@ struct returnRes	nickMethod(Book* book, struct returnRes res,
 								Client* curClient, std::vector<std::string> words)
 {
 	if (words.size() == 1)
-		res->msg = resultString("431 :No nickname given");
+		res.msg = resultString("431 :No nickname given");
 	else
 	{
 		if (!book->checkNicknames(words[1]))
@@ -102,12 +102,12 @@ struct returnRes	nickMethod(Book* book, struct returnRes res,
 				}
 			}
 			if (flag || words[1].size() > 9)
-				res->msg = resultString("432 " + words[1] + " :Erroneus nickname");
+				res.msg = resultString("432 " + words[1] + " :Erroneus nickname");
 			else
 				curClient->setNick(words[1]);
 		}
 		else
-			res->msg = resultString("433 " + words[1] + " :Nickname is already in use");
+			res.msg = resultString("433 " + words[1] + " :Nickname is already in use");
 	}
 	return res;
 }
@@ -116,11 +116,11 @@ struct returnRes	userMethod(struct returnRes res, Client* curClient,
 								std::vector<std::string> words)
 {
 	if (!curClient->getUser().empty())
-		res->msg = resultString("462 :You may not reregister");
+		res.msg = resultString("462 :You may not reregister");
 	else
 	{
 		if (words.size() < 5)
-			res->msg = resultString("461 USER :Not enough parameters");
+			res.msg = resultString("461 USER :Not enough parameters");
 		else
 		{
 			curClient->setUser(words[1]);
@@ -137,7 +137,7 @@ struct returnRes	passMethod(Book* book, struct returnRes res,
 	if (words[0] == "PASS")
 	{
 		if (words.size() == 1)
-			res->msg = resultString("461 PASS :Not enough parameters");
+			res.msg = resultString("461 PASS :Not enough parameters");
 		else
 		{
 			if (words[1] == book->getPassword())
@@ -145,7 +145,7 @@ struct returnRes	passMethod(Book* book, struct returnRes res,
 		}
 	}
 	else
-		res->msg = resultString("451 :" + SERVER + " :You have not registered");
+		res.msg = resultString("451 :" + SERVER + " :You have not registered");
 	return res;
 }
 
@@ -176,7 +176,8 @@ std::vector<struct returnRes>*	privMsgMethod(Book* book,
 			if (!book->checkNicknames(recipients[i]) && !book->searchChannel(recipients[i]))
 			{
 				res.msg = resultString("401 " + recipients[i] + " :No such nick/channel");
-				return result->push_back(res);
+				result->push_back(res);
+				return result;
 			}
 		}
 		for (int i = 0; recipients.size(); i++)
@@ -193,7 +194,8 @@ std::vector<struct returnRes>*	privMsgMethod(Book* book,
 				if (book->checkNickInChannels(nicks[i], channels))
 				{
 					res.msg = resultString("407 " + nicks[i] + " :Duplicate recipients. No message delivered");
-					return result->push_back(res);
+					result->push_back(res);
+					return result;
 				}
 			}
 		}
@@ -225,9 +227,9 @@ std::vector<struct returnRes>*	privMsgMethod(Book* book,
 			}
 		}
 		else
-			res->msg = resultString("412 :No text to send");
+			res.msg = resultString("412 :No text to send");
 	}
-	if (result.empty())
+	if (result->empty())
 	{
 		res.users = curClient->getSession();
 		result->push_back(res);
