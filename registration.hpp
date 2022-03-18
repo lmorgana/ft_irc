@@ -233,6 +233,38 @@ std::vector<struct returnRes>*	privMsgMethod(Book* book,
 	return result;
 }
 
+struct returnRes	joinMethod(Book* book, struct returnRes res,
+								Client* curClient, std::vector<std::string> words)
+{
+	std::vector<std::string> channels;
+
+	if (words.size() == 1)
+		res.msg = resultString("461 JOIN :Not enough parameters");
+	else
+	{
+		channels = ft_split(words[1], ',');
+		for (size_t i = 0; i < channels.size(); i++)
+		{
+			if (channels[i][0] == '#' || channels[i][0] == '&')
+				book->joinClientChannel(channels[i], curClient);
+			// else
+			// 	// TODO
+		}
+	}
+	return res;
+}
+
+struct returnRes	kickMethod(Book* book, struct returnRes res,
+								Client* curClient, std::vector<std::string> words)
+{
+	if (words.size() < 3)
+		res.msg = resultString("461 JOIN :Not enough parameters");
+	else
+	{
+		// if (words[1])
+	}
+}
+
 std::vector<struct returnRes>*	checkData(Session* current, char* buf,
 										Book* book, std::vector<struct returnRes>* result)
 {
@@ -269,7 +301,8 @@ std::vector<struct returnRes>*	checkData(Session* current, char* buf,
 			res = nickMethod(book, res, curClient, words);
 		else if (words[0] == "PRIVMSG" || words[0] == "NOTICE")
 			result = privMsgMethod(book, res, curClient, words, result);
-
+		else if (words[0] == "JOIN")
+			res = joinMethod(book, res, curClient, words);
 		else
 			res.msg = resultString("421 " + words[0] + " :Unknown command");
 	}
