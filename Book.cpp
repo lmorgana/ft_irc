@@ -164,3 +164,14 @@ bool Book::checkNickInChannels(std::string nick, std::vector<std::string> name_c
     }
     return false;
 }
+
+Session * Book::getSession(std::string nick)
+{
+    size_t size = clients.size();
+    for (size_t i = 0; i < size; i++)
+    {
+        if (clients[i]->getNick() == nick)
+            return clients[i]->getSession();
+    }
+    return NULL;
+}

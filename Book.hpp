@@ -20,6 +20,7 @@ class Book{
 
     Book(char *password);
     Client *getClient(Session *session);
+    Session * getSession(std::string nick);
     Session * searchSession(std::string nick);
     bool searchBySession(Session *session);
     std::string getPassword();
