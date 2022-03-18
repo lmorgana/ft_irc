@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20.2)
 project(ft_irc)
 
-add_compile_options(-Wall -Wextra -Werror -std=c++98)
+#add_compile_options(-Wall -Wextra -Werror -std=c++98)
 
 set(CMAKE_CXX_STANDARD 14)
 

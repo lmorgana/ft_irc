@@ -7,12 +7,25 @@
 #include <map>
 #include <unistd.h>
 
+void regestration (int fd, std::string name)
+{
+	std::cout << name << " registrating" << std::endl;
+	write(fd, "PASS PASS\n", 10);
+	sleep(1);
+	std::string st1 = "NICK " + name + " \n";
+	write(fd, st1.c_str(), st1.length());
+	sleep(1);
+	st1.clear();
+	st1 = "USER BOT_" + name + " localhost serv: R" + name + "\n";
+	write(fd, st1.c_str(), st1.length());
+}
+
 int main (int argc, char **argv)
 {
 	(void) argc;
 
 	int port = int (atoi(argv[2]));
-	char *bot_name = argv[1];
+	std::string bot_name = argv[1];
 	int ls, opt, res;
 	struct sockaddr_in addr, serv_addr;
 
@@ -42,19 +55,9 @@ int main (int argc, char **argv)
 	}
 	else
 	{
-		std::cout << "ANTON here" << std::endl;
-		write(ls, "PASS PASS\n", 10);
-		sleep(1);
-		write(ls, "NICK \n", 5);
-		write(ls, bot_name, strlen(bot_name));
-		write(ls, "\n", 1);
-		sleep(1);
-		write(ls, "USER BOT_", 9);
-		write(ls, bot_name, strlen(bot_name));
-		write(ls, "localhost serv: R", 16);
-		write(ls, bot_name, strlen(bot_name));
-		write(ls, "\n", 1);
+		regestration(ls, bot_name);
 	}
-//	close(ls);
+	sleep(3);
+	close(ls);
 	return (0);
 }

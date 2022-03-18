@@ -31,25 +31,24 @@ void EventSelector::Add(FdHandler *h)
 bool EventSelector::Remove(FdHandler *h)
 {
 	int fd = h->GetFd();
-	int index = search_fd_poolfd(fd);
 
 	//needed to be modify
-	if(fd >= int(fd_array.size()) || fd_array[fd] != h || index < 0)
+	if(fd >= int(fd_array.size()) || fd_array[fd] != h)
 		return false;
 	fd_array[fd] = nullptr;
 
-	iterator_pollfd iter = poll_array.begin();
-	int i = 0;
-
-	while (i < index && iter != poll_array.end())
+	iterator_pollfd iter;
+	for (iter = poll_array.begin(); iter != poll_array.end(); iter++)
 	{
-		i++;
-		index++;
+		if (iter->fd == fd)
+			break;
 	}
 	if (iter == poll_array.end())
 		return false;
 	poll_array.erase(iter);
-	if(fd == max_fd) {
+	close(fd);
+	if(fd == max_fd)
+	{
 		while(max_fd >= 0 && !fd_array[max_fd])
 			max_fd--;
 	}

@@ -25,6 +25,7 @@ public:
 
 	void RemoveSession(Session *s, const char *msg);
 	Book *getBook();
+	void send_msg(const char *msg, std::vector<Session*> users);
 
 private:
 	virtual void Handle(bool r);

@@ -84,3 +84,11 @@ Book *Server::getBook()
 {
 	return (&book);
 }
+
+void Server::send_msg(const char *msg, std::vector<Session*> users)
+{
+	for (size_t i = 0; i < users.size(); i++)
+	{
+		users[i]->send(msg);
+	}
+}

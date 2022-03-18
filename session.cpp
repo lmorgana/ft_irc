@@ -24,7 +24,7 @@ void Session::Handle(bool r)
 		if (rc > 0)
 		{
 			result = checkData(this, buffer, the_master->getBook(), result);
-			result->users[0]->send(result->msg.c_str());
+			the_master->send_msg(result->msg.c_str(), result->users);
 		}
 		else if (rc == 0)
 		{
