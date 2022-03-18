@@ -7,7 +7,7 @@
 #include <map>
 #include <unistd.h>
 
-void regestration (int fd, std::string name)
+void registration (int fd, std::string name)
 {
 	std::cout << name << " registrating" << std::endl;
 	write(fd, "PASS PASS\n", 10);
@@ -20,12 +20,53 @@ void regestration (int fd, std::string name)
 	write(fd, st1.c_str(), st1.length());
 }
 
+bool ft_send (int fd, std::string to_name, std::string msg)
+{
+	std::string to_send = "PRIVMSG " + to_name + " " + msg;
+	int res;
+
+	res = write(fd, to_send.c_str(), to_send.length());
+	return (res != -1);
+}
+
+bool ft_reciev(int fd, std::string msg)
+{
+	char buffer[512];
+	int res;
+
+	res = read(fd, buffer, sizeof(buffer));
+	if (res > 0)
+		return (msg == buffer);
+	return (false);
+}
+
+int process(std::string name, int numb, int fd)
+{
+	int res = -1;
+
+	if (numb != 0)
+	{
+		if (numb % 2 == 0)
+		{
+			numb++;
+			res = ft_send(fd, name + std::to_string(numb + 1), "message from " + std::to_string(numb));
+		}
+		else
+		{
+			sleep(1);
+			res = ft_reciev(fd, "message from " + std::to_string(numb - 1));
+		}
+	}
+	return (res);
+}
+
 int main (int argc, char **argv)
 {
 	(void) argc;
 
-	int port = int (atoi(argv[2]));
-	std::string bot_name = argv[1];
+	int port = int (atoi(argv[3]));
+	int numb = int (atoi(argv[2]));
+	std::string bot_name = argv[1] + numb;
 	int ls, opt, res;
 	struct sockaddr_in addr, serv_addr;
 
@@ -55,7 +96,8 @@ int main (int argc, char **argv)
 	}
 	else
 	{
-		regestration(ls, bot_name);
+		registration(ls, bot_name);
+		process(argv[1], numb, ls);
 	}
 	sleep(3);
 	close(ls);

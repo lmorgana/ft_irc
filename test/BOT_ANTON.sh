@@ -8,5 +8,5 @@ sum=80; # начальный порт, после ++
 
 for (( ; i < num; i++, sum++))
 do
-  ./bot_anton anton$i $sum &
+  ./bot_anton anton $i $sum &
 done

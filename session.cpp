@@ -17,14 +17,15 @@ Session::~Session()
 
 void Session::Handle(bool r)
 {
-	struct returnRes *result = new struct returnRes;
+	std::vector<struct returnRes> *result = new std::vector<struct returnRes>;
 	if (r)
 	{
 		int rc = read(GetFd(), buffer, sizeof(buffer));
 		if (rc > 0)
 		{
 			result = checkData(this, buffer, the_master->getBook(), result);
-			the_master->send_msg(result->msg.c_str(), result->users);
+//			the_master->send_msg(result->msg.c_str(), result->users);
+			the_master->send_msg(result);
 		}
 		else if (rc == 0)
 		{
