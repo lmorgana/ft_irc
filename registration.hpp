@@ -1,4 +1,7 @@
 
+#ifndef REGISTRATION_HPP
+#define REGISTRATION_HPP
+
 #include "header.hpp"
 #include "session.hpp"
 #include "Client.hpp"
@@ -20,12 +23,6 @@ const std::string SERVER = "blueCat";
 // 	std::string	getPassword() {}
 // 	bool	checkNicknames(std::string nick) {}
 // };
-
-struct returnRes
-{
-	std::string	msg;
-	Session*	users;
-};
 
 // std::map<std::string, std::string> errorMsg(Book book, std::string str)
 // {
@@ -210,17 +207,17 @@ std::vector<struct returnRes>*	privMsgMethod(Book* book,
 				res.msg = resultString(res.msg);
 				if (recipients[i][0] == '#')
 				{
-					std::vector<Client*> clientRes = book->getClientsChannel(recipients[i]);
-					for (int j = 0; j < clientRes.size(); j++)
+					std::vector<Client*> *clientRes = book->getClientsChannel(recipients[i]);
+					for (int j = 0; j < clientRes->size(); j++)
 					{
-						res.users = clientRes[j]->getSession();
+						res.users = (*clientRes)[j]->getSession();
 						result->push_back(res);
 						res.users = nullptr;
 					}
 				}
 				else
 				{
-					res.users = book->getSession(recipients[i]);
+					res.users = (*book).getSession(recipients[i]);
 					result->push_back(res);
 				}
 				clearResStruct(&res);
@@ -296,3 +293,5 @@ std::vector<struct returnRes>*	checkData(Session* current, char* buf,
 
 	return result;
 }
+
+#endif

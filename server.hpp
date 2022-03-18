@@ -5,8 +5,7 @@
 #include "sockets.hpp"
 #include "session.hpp"
 #include "Book.hpp"
-
-class Session;
+//#include "registration.hpp"
 
 class Server : public FdHandler {
 	EventSelector	*the_selector;

@@ -16,6 +16,13 @@
 #include <string>
 #include <vector>
 
+struct returnRes
+{
+	std::string	msg;
+	Session*	users;
+};
+
+
 static const char *EXIT_MSG = "*** someone leave us ***\n";
 
 #endif

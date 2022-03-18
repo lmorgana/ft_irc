@@ -97,7 +97,7 @@ int main (int argc, char **argv)
 	else
 	{
 		registration(ls, bot_name);
-		process(argv[1], numb, ls);
+//		process(argv[1], numb, ls);
 	}
 	sleep(3);
 	close(ls);

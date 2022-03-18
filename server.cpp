@@ -89,6 +89,7 @@ void Server::send_msg(std::vector<struct returnRes> *result)
 {
 	for (size_t i = 0; i < result->size(); i++)
 	{
-		result[i]->send(result[i]->msg);
+		Session *n = (*result)[i].users;
+		n->send((*result)[i].msg.c_str());
 	}
 }
