@@ -175,3 +175,19 @@ Session * Book::getSession(std::string nick)
     }
     return NULL;
 }
+bool Book::checkHostChanel(std::string name, Client *client)
+{
+    size_t size = channels.size();
+    Client *ck;
+    for (size_t i = 0; i < size; i++)
+    {
+        if (channels[i]->getName() == name)
+        {
+            ck = channels[i]->getHostChannel();
+            if (ck && ck == client)
+                return true;
+        }
+    }
+
+    return false;
+}
