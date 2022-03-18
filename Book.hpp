@@ -32,7 +32,8 @@ class Book{
 
     void joinClientChannel(std::string name, Client *client);
     bool kickClientChannel(std::string name, Client *client);
-    std::vector<Client *> * getClientsChannel(std::string name); 
+    std::vector<Client *> * getClientsChannel(std::string name);
+    bool checkHostChanel(std::string name, Client *client);
 
     ~Book();
 	
