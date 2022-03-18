@@ -146,12 +146,6 @@ struct returnRes	passMethod(Book* book, struct returnRes res,
 	return res;
 }
 
-void clearResStruct(struct returnRes* res)
-{
-	res->msg.clear();
-	res->users = nullptr;
-}
-
 std::vector<struct returnRes>*	privMsgMethod(Book* book,
 											struct returnRes res,
 											Client* curClient,
@@ -168,16 +162,18 @@ std::vector<struct returnRes>*	privMsgMethod(Book* book,
 	else
 	{
 		recipients = ft_split(words[1], ',');
-		for (int i = 0; recipients.size(); i++)
+		for (size_t i = 0; i < recipients.size(); i++)
 		{
+			std::cout << "Rec " << recipients[i] << std::endl;
 			if (!book->checkNicknames(recipients[i]) && !book->searchChannel(recipients[i]))
 			{
 				res.msg = resultString("401 " + recipients[i] + " :No such nick/channel");
+				res.users = curClient->getSession();
 				result->push_back(res);
 				return result;
 			}
 		}
-		for (int i = 0; recipients.size(); i++)
+		for (size_t i = 0; i < recipients.size(); i++)
 		{
 			if (recipients[i][0] == '#')
 				channels.push_back(recipients[i]);
@@ -186,11 +182,12 @@ std::vector<struct returnRes>*	privMsgMethod(Book* book,
 		}
 		if (!channels.empty() && !nicks.empty())
 		{
-			for (int i = 0; i < nicks.size(); i++)
+			for (size_t i = 0; i < nicks.size(); i++)
 			{
 				if (book->checkNickInChannels(nicks[i], channels))
 				{
 					res.msg = resultString("407 " + nicks[i] + " :Duplicate recipients. No message delivered");
+					res.users = curClient->getSession();
 					result->push_back(res);
 					return result;
 				}
@@ -198,21 +195,24 @@ std::vector<struct returnRes>*	privMsgMethod(Book* book,
 		}
 		if (words[2][0] == ':')
 		{
-			for (int i = 0; recipients.size(); i++)
+			for (size_t i = 0; i < recipients.size(); i++)
 			{
 				res.msg += ":" + curClient->getNick() + "!" + curClient->getUser();
-				res.msg += "@127.0.0.1 PRIVMSG " + recipients[i];
-				for (int i = 2; i < words.size(); i++)
+				res.msg += "@127.0.0.1 PRIVMSG " + recipients[i] + " ";
+				for (size_t i = 2; i < words.size(); i++)
+				{
 					res.msg += words[i];
+					if (i != words.size() - 1)
+						res.msg += " ";
+				}
 				res.msg = resultString(res.msg);
-				if (recipients[i][0] == '#')
+				if (recipients[i][0] == '#' || recipients[i][0] == '&')
 				{
 					std::vector<Client*> *clientRes = book->getClientsChannel(recipients[i]);
-					for (int j = 0; j < clientRes->size(); j++)
+					for (size_t j = 0; j < clientRes->size(); j++)
 					{
 						res.users = (*clientRes)[j]->getSession();
 						result->push_back(res);
-						res.users = nullptr;
 					}
 				}
 				else
@@ -220,7 +220,6 @@ std::vector<struct returnRes>*	privMsgMethod(Book* book,
 					res.users = (*book).getSession(recipients[i]);
 					result->push_back(res);
 				}
-				clearResStruct(&res);
 			}
 		}
 		else
@@ -261,14 +260,16 @@ std::vector<struct returnRes>*	checkData(Session* current, char* buf,
 			res.msg += "376 :End of /MOTD command";
 			res.msg = resultString(res.msg);
 		}
+		if (!curClient->getUser().empty() && !curClient->getNick().empty())
+			curClient->setAuthorized();
 	}
-	//TODO change to method which if user is registered
 	else if (curClient->getAuthorized())
 	{
 		if (words[0] == "NICK")
 			res = nickMethod(book, res, curClient, words);
-		else if (words[0] == "PRIVMSG")
+		else if (words[0] == "PRIVMSG" || words[0] == "NOTICE")
 			result = privMsgMethod(book, res, curClient, words, result);
+
 		else
 			res.msg = resultString("421 " + words[0] + " :Unknown command");
 	}
