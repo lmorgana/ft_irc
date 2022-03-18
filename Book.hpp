@@ -25,6 +25,8 @@ class Book{
     std::string getPassword();
     bool checkNicknames(std::string nick);
     size_t size();
+    bool searchChannel(std::string name);
+    bool kickClient(Session *session);
 
     void joinClientChannel(std::string name, Client *client);
     bool kickClientChannel(std::string name, Client *client);

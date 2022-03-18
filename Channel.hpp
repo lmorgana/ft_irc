@@ -23,6 +23,7 @@ class Channel
     std::vector<Client *> * getClients();
     bool kickClient(Client *client);
     void addClient(Client *client);
+    bool searchClient(Client *client);
     ~Channel();
 };
 #endif

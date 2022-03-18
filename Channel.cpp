@@ -51,6 +51,17 @@ void Channel::addClient(Client *client)
         clients->push_back(client);
 }
 
+bool Channel::searchClient(Client *client)
+{
+    size_t size = clients->size();
+    for (size_t i = 0; i < size; i++)
+    {
+        if ((*clients)[i] == client)
+            return true;
+    }
+    return false;
+}
+
  Channel::~Channel()
  {
      delete clients;

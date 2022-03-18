@@ -110,3 +110,39 @@ std::vector<Client *> * Book::getClientsChannel(std::string name)
     }
     return NULL;
 }
+
+bool Book::searchChannel(std::string name)
+{
+    size_t size = channels.size();
+    for(size_t i = 0; i < size; i++)
+    {
+        if (name == channels[i]->getName())
+            return true;
+    }
+    return false;
+}
+
+bool Book::kickClient(Session *session)
+{
+    size_t size = channels.size();
+    int index = -1;
+    Client * client = getClient(session);
+    for(size_t i = 0; i < size; i++)
+    {
+        if (channels[i]->searchClient(client))
+            channels[i]->kickClient(client);
+    }
+    size = clients.size();
+    for(size_t i = 0; i < size; i++)
+    {
+        if (clients[i] == client)
+            index = i;
+    }
+    if (index != -1)
+    {
+        clients.erase(clients.begin() + index);
+        delete client;
+        return true;
+    }
+    return false;
+}
