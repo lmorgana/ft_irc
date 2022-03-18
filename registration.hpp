@@ -23,9 +23,8 @@ const std::string SERVER = "blueCat";
 
 struct returnRes
 {
-	std::string				msg;
-	std::vector<Session*>	users;
-
+	std::string	msg;
+	Session*	users;
 };
 
 // std::map<std::string, std::string> errorMsg(Book book, std::string str)
@@ -39,7 +38,7 @@ struct returnRes
 // 	return error;
 // }
 
-std::string	toCString(std::string str)
+std::string	resultString(std::string str)
 {
 	if (!str.empty())
 		str += "\r\n";
@@ -80,11 +79,11 @@ std::vector<std::string>	ft_split(std::string s, char c)
 	return res;
 }
 
-struct returnRes*	nickMethod(Book* book, struct returnRes* res,
+struct returnRes	nickMethod(Book* book, struct returnRes res,
 								Client* curClient, std::vector<std::string> words)
 {
 	if (words.size() == 1)
-		res->msg = toCString("431 :No nickname given");
+		res.msg = resultString("431 :No nickname given");
 	else
 	{
 		if (!book->checkNicknames(words[1]))
@@ -103,25 +102,25 @@ struct returnRes*	nickMethod(Book* book, struct returnRes* res,
 				}
 			}
 			if (flag || words[1].size() > 9)
-				res->msg = toCString("432 " + words[1] + " :Erroneus nickname");
+				res.msg = resultString("432 " + words[1] + " :Erroneus nickname");
 			else
 				curClient->setNick(words[1]);
 		}
 		else
-			res->msg = toCString("433 " + words[1] + " :Nickname is already in use");
+			res.msg = resultString("433 " + words[1] + " :Nickname is already in use");
 	}
 	return res;
 }
 
-struct returnRes*	userMethod(struct returnRes* res, Client* curClient,
+struct returnRes	userMethod(struct returnRes res, Client* curClient,
 								std::vector<std::string> words)
 {
 	if (!curClient->getUser().empty())
-		res->msg = toCString("462 :You may not reregister");
+		res.msg = resultString("462 :You may not reregister");
 	else
 	{
 		if (words.size() < 5)
-			res->msg = toCString("461 USER :Not enough parameters");
+			res.msg = resultString("461 USER :Not enough parameters");
 		else
 		{
 			curClient->setUser(words[1]);
@@ -132,13 +131,13 @@ struct returnRes*	userMethod(struct returnRes* res, Client* curClient,
 	return res;
 }
 
-struct returnRes*	passMethod(Book* book, struct returnRes* res,
+struct returnRes	passMethod(Book* book, struct returnRes res,
 								Client* curClient, std::vector<std::string> words)
 {
 	if (words[0] == "PASS")
 	{
 		if (words.size() == 1)
-			res->msg = toCString("461 PASS :Not enough parameters");
+			res.msg = resultString("461 PASS :Not enough parameters");
 		else
 		{
 			if (words[1] == book->getPassword())
@@ -146,75 +145,154 @@ struct returnRes*	passMethod(Book* book, struct returnRes* res,
 		}
 	}
 	else
-		res->msg = toCString("451 :" + SERVER + " :You have not registered");
+		res.msg = resultString("451 :" + SERVER + " :You have not registered");
 	return res;
 }
 
-struct returnRes*	privMsgMethod(Book* book, struct returnRes* res,
-								Client* curClient, std::vector<std::string> words)
+void clearResStruct(struct returnRes* res)
 {
-	(void) book;
-	(void) curClient;
-	std::string	privMsg;
-	std::vector<std::string> nicks;
-
-	if (words.size() < 3)
-		res->msg = toCString("412 :No text to send");
-	else
-	{
-		nicks = ft_split(words[1], ',');
-		std::cout << nicks[0] << std::endl;
-	}
-	return (res);
+	res->msg.clear();
+	res->users = nullptr;
 }
 
-struct returnRes*	checkData(Session* current, char* buf, Book* book, struct returnRes* res)
+std::vector<struct returnRes>*	privMsgMethod(Book* book,
+											struct returnRes res,
+											Client* curClient,
+											std::vector<std::string> words,
+											std::vector<struct returnRes>* result)
+{
+	std::string					privMsg;
+	std::vector<std::string>	recipients;
+	std::vector<std::string>	nicks;
+	std::vector<std::string>	channels;
+
+	if (words.size() < 3)
+		res.msg = resultString("412 :No text to send");
+	else
+	{
+		recipients = ft_split(words[1], ',');
+		for (int i = 0; recipients.size(); i++)
+		{
+			if (!book->checkNicknames(recipients[i]) && !book->searchChannel(recipients[i]))
+			{
+				res.msg = resultString("401 " + recipients[i] + " :No such nick/channel");
+				result->push_back(res);
+				return result;
+			}
+		}
+		for (int i = 0; recipients.size(); i++)
+		{
+			if (recipients[i][0] == '#')
+				channels.push_back(recipients[i]);
+			else
+				nicks.push_back(recipients[i]);
+		}
+		if (!channels.empty() && !nicks.empty())
+		{
+			for (int i = 0; i < nicks.size(); i++)
+			{
+				if (book->checkNickInChannels(nicks[i], channels))
+				{
+					res.msg = resultString("407 " + nicks[i] + " :Duplicate recipients. No message delivered");
+					result->push_back(res);
+					return result;
+				}
+			}
+		}
+		if (words[2][0] == ':')
+		{
+			for (int i = 0; recipients.size(); i++)
+			{
+				res.msg += ":" + curClient->getNick() + "!" + curClient->getUser();
+				res.msg += "@127.0.0.1 PRIVMSG " + recipients[i];
+				for (int i = 2; i < words.size(); i++)
+					res.msg += words[i];
+				res.msg = resultString(res.msg);
+				if (recipients[i][0] == '#')
+				{
+					std::vector<Client*> clientRes = book->getClientsChannel(recipients[i]);
+					for (int j = 0; j < clientRes.size(); j++)
+					{
+						res.users = clientRes[j]->getSession();
+						result->push_back(res);
+						res.users = nullptr;
+					}
+				}
+				else
+				{
+					res.users = book->getSession(recipients[i]);
+					result->push_back(res);
+				}
+				clearResStruct(&res);
+			}
+		}
+		else
+			res.msg = resultString("412 :No text to send");
+	}
+	if (result->empty())
+	{
+		res.users = curClient->getSession();
+		result->push_back(res);
+	}
+	return result;
+}
+
+std::vector<struct returnRes>*	checkData(Session* current, char* buf,
+										Book* book, std::vector<struct returnRes>* result)
 {
 	std::string str = buf;
 	str = str.substr(0, str.length() - 1);
 	Client*	curClient = book->getClient(current);
 	std::vector<std::string> words = ft_split(str, ' ');
+
+	struct returnRes res;
 	
 	if (curClient->getPass() && (curClient->getUser().empty() || curClient->getNick().empty()))
 	{
 		if (words[0] == "PASS")
-			res->msg = toCString("462 :You may not reregister");
+			res.msg = resultString("462 :You may not reregister");
 		else if (words[0] == "NICK")
 			res = nickMethod(book, res, curClient, words);
 		else if (words[0] == "USER" && curClient->getUser().empty())
 			res = userMethod(res, curClient, words);
 		else
-			res->msg = toCString("451 :" + SERVER + " :You have not registered");
+			res.msg = resultString("451 :" + SERVER + " :You have not registered");
 		if (!curClient->getUser().empty() && !curClient->getNick().empty())
 		{
-			res->msg += "375 :- " + SERVER + " Message of the day - \n";
-			res->msg += "372 :- Welcome to our server!\n";
-			res->msg += "376 :End of /MOTD command";
-			res->msg = toCString(res->msg);
+			res.msg += "375 :- " + SERVER + " Message of the day - \n";
+			res.msg += "372 :- Welcome to our server!\n";
+			res.msg += "376 :End of /MOTD command";
+			res.msg = resultString(res.msg);
 		}
 	}
 	//TODO change to method which if user is registered
-	else if (curClient->getPass() && !curClient->getUser().empty() && !curClient->getNick().empty())
+	else if (curClient->getAuthorized())
 	{
 		if (words[0] == "NICK")
 			res = nickMethod(book, res, curClient, words);
 		else if (words[0] == "PRIVMSG")
-		{}
-		// else if (words[0][0] == ':' && words[1] == "PRIVMSG" && words.size() >= 4
-		// 		&& book->checkNicknames(words[0].substr(1, words[0].length() - 1)))
-		// {
-			
-		// }
+			result = privMsgMethod(book, res, curClient, words, result);
+		else
+			res.msg = resultString("421 " + words[0] + " :Unknown command");
 	}
 	else
 		res = passMethod(book, res, curClient, words);
 
-	res->users.push_back(current);
+	//FIXME when there are several users
+	// if (!res.users)
+	// 	res.users = current;
+
+	//FIXME when there are several users
+	if (result->empty())
+	{
+		res.users = current;
+		result->push_back(res);
+	}
 
 	std::cout << "Pass: " << curClient->getPass() << std::endl;
 	std::cout << "Nick: " << curClient->getNick() << std::endl;
 	std::cout << "User: " << curClient->getUser() << std::endl;
 	std::cout << "Name: " << curClient->getRealName() << std::endl;
 
-	return res;
+	return result;
 }
