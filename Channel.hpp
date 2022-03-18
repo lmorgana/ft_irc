@@ -13,16 +13,18 @@ class Channel
     private:
 
     std::string _name;
-    std::vector<Client *> clients;
+    std::vector<Client *> *clients;
 
     public:
 
     Channel(std::string name);
     std::string getName();
     Client * getHostChannel();
-    std::vector<Client *> getClients();
-    void kickClient(Client *client);
+    std::vector<Client *> * getClients();
+    bool kickClient(Client *client);
     void addClient(Client *client);
+    bool searchClient(Client *client);
+    bool searchNick(std::string nick);
     ~Channel();
 };
 #endif

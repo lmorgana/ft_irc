@@ -19,15 +19,15 @@ Client * Book::getClient(Session *session)
     }
     return NULL;
 }
-Session * Book::getSession(std::string nick)
+Session * Book::searchSession(std::string nick)
 {
     size_t size = clients.size();
     for (size_t i = 0; i < size;i++)
     {
         if (nick == clients[i]->getNick())
-            return  clients[i]->getSession();
+            return clients[i]->getSession();
     }
-    return static_cast <Session *>(0);
+    return NULL;
 }
 
 size_t Book::size()
@@ -49,11 +49,11 @@ Book::~Book()
 {
     size_t size = clients.size();
     for (size_t i = 0; i < size;i++)
-    {
         delete clients[i];
-    }
+    size = channels.size();
+    for (size_t i = 0; i < size;i++)
+        delete channels[i];
 }
-
 
 std::string Book:: getPassword()
 {
@@ -89,22 +89,78 @@ void Book::joinClientChannel(std::string name, Client *client)
             channels[i]->addClient(client);
     }
 }
-void Book::kickClientChannel(std::string name, Client *client)
+bool Book::kickClientChannel(std::string name, Client *client)
 {
     size_t size = channels.size();
     for(size_t i = 0; i < size; i++)
     {
         if (name == channels[i]->getName())
-            channels[i]->kickClient(client);
+            return channels[i]->kickClient(client);
     }
+    return false;
 }
-std::vector<Client *> Book::getClientsChannel(std::string name)
+std::vector<Client *> * Book::getClientsChannel(std::string name)
 {
+
     size_t size = channels.size();
     for(size_t i = 0; i < size; i++)
     {
         if (name == channels[i]->getName())
             return channels[i]->getClients();
     }
-    return static_cast<std::vector<Client *> >(0);
+    return NULL;
+}
+
+bool Book::searchChannel(std::string name)
+{
+    size_t size = channels.size();
+    for(size_t i = 0; i < size; i++)
+    {
+        if (name == channels[i]->getName())
+            return true;
+    }
+    return false;
+}
+
+bool Book::kickClient(Session *session)
+{
+    size_t size = channels.size();
+    int index = -1;
+    Client * client = getClient(session);
+    for(size_t i = 0; i < size; i++)
+    {
+        if (channels[i]->searchClient(client))
+            channels[i]->kickClient(client);
+    }
+    size = clients.size();
+    for(size_t i = 0; i < size; i++)
+    {
+        if (clients[i] == client)
+            index = i;
+    }
+    if (index != -1)
+    {
+        clients.erase(clients.begin() + index);
+        delete client;
+        return true;
+    }
+    return false;
+}
+
+bool Book::checkNickInChannels(std::string nick, std::vector<std::string> name_channel)
+{
+    size_t size_chanel =  channels.size();
+    size_t size_name_channel_vec = name_channel.size();
+    for (size_t i = 0; i < size_chanel; i++)
+    {
+        for(size_t j = 0; j < size_name_channel_vec; j++)
+        {
+            if (channels[i]->getName() == name_channel[j])
+            {
+                if (channels[i]->searchNick(nick))
+                    return true;
+            }
+        }
+    }
+    return false;
 }

@@ -20,15 +20,18 @@ class Book{
 
     Book(char *password);
     Client *getClient(Session *session);
-    Session * getSession(std::string nick);
+    Session * searchSession(std::string nick);
     bool searchBySession(Session *session);
     std::string getPassword();
     bool checkNicknames(std::string nick);
     size_t size();
+    bool searchChannel(std::string name);
+    bool kickClient(Session *session);
+    bool checkNickInChannels(std::string nick, std::vector<std::string> name_channel); 
 
     void joinClientChannel(std::string name, Client *client);
-    void kickClientChannel(std::string name, Client *client);
-    std::vector<Client *> getClientsChannel(std::string name); 
+    bool kickClientChannel(std::string name, Client *client);
+    std::vector<Client *> * getClientsChannel(std::string name); 
 
     ~Book();
 	
