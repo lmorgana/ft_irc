@@ -146,3 +146,21 @@ bool Book::kickClient(Session *session)
     }
     return false;
 }
+
+bool Book::checkNickInChannels(std::string nick, std::vector<std::string> name_channel)
+{
+    size_t size_chanel =  channels.size();
+    size_t size_name_channel_vec = name_channel.size();
+    for (size_t i = 0; i < size_chanel; i++)
+    {
+        for(size_t j = 0; j < size_name_channel_vec; j++)
+        {
+            if (channels[i]->getName() == name_channel[j])
+            {
+                if (channels[i]->searchNick(nick))
+                    return true;
+            }
+        }
+    }
+    return false;
+}

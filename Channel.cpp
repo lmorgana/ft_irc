@@ -61,6 +61,16 @@ bool Channel::searchClient(Client *client)
     }
     return false;
 }
+ bool Channel::searchNick(std::string nick)
+ {
+    size_t size = clients->size();
+    for (size_t i = 0; i < size; i++)
+    {
+        if ((*clients)[i]->getNick() == nick)
+            return true;
+    }
+    return false;
+ }
 
  Channel::~Channel()
  {

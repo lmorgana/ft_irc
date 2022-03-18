@@ -27,6 +27,7 @@ class Book{
     size_t size();
     bool searchChannel(std::string name);
     bool kickClient(Session *session);
+    bool checkNickInChannels(std::string nick, std::vector<std::string> name_channel); 
 
     void joinClientChannel(std::string name, Client *client);
     bool kickClientChannel(std::string name, Client *client);

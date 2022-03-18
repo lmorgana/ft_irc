@@ -24,6 +24,7 @@ class Channel
     bool kickClient(Client *client);
     void addClient(Client *client);
     bool searchClient(Client *client);
+    bool searchNick(std::string nick);
     ~Channel();
 };
 #endif
