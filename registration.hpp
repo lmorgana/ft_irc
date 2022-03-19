@@ -164,7 +164,6 @@ std::vector<struct returnRes>*	privMsgMethod(Book* book,
 		recipients = ft_split(words[1], ',');
 		for (size_t i = 0; i < recipients.size(); i++)
 		{
-			std::cout << "Rec " << recipients[i] << std::endl;
 			if (!book->checkNicknames(recipients[i]) && !book->searchChannel(recipients[i]))
 			{
 				res.msg = resultString("401 " + recipients[i] + " :No such nick/channel");
@@ -175,7 +174,7 @@ std::vector<struct returnRes>*	privMsgMethod(Book* book,
 		}
 		for (size_t i = 0; i < recipients.size(); i++)
 		{
-			if (recipients[i][0] == '#')
+			if (recipients[i][0] == '#' || recipients[i][0] == '&')
 				channels.push_back(recipients[i]);
 			else
 				nicks.push_back(recipients[i]);
@@ -197,7 +196,7 @@ std::vector<struct returnRes>*	privMsgMethod(Book* book,
 		{
 			for (size_t i = 0; i < recipients.size(); i++)
 			{
-				res.msg += ":" + curClient->getNick() + "!" + curClient->getUser();
+				res.msg = ":" + curClient->getNick() + "!" + curClient->getUser();
 				res.msg += "@127.0.0.1 " + words[0] + " " + recipients[i] + " ";
 				for (size_t i = 2; i < words.size(); i++)
 				{
