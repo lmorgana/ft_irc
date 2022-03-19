@@ -198,7 +198,7 @@ std::vector<struct returnRes>*	privMsgMethod(Book* book,
 			for (size_t i = 0; i < recipients.size(); i++)
 			{
 				res.msg += ":" + curClient->getNick() + "!" + curClient->getUser();
-				res.msg += "@127.0.0.1 PRIVMSG " + recipients[i] + " ";
+				res.msg += "@127.0.0.1 " + words[0] + " " + recipients[i] + " ";
 				for (size_t i = 2; i < words.size(); i++)
 				{
 					res.msg += words[i];
@@ -233,36 +233,115 @@ std::vector<struct returnRes>*	privMsgMethod(Book* book,
 	return result;
 }
 
-struct returnRes	joinMethod(Book* book, struct returnRes res,
-								Client* curClient, std::vector<std::string> words)
+std::vector<struct returnRes>*	joinMethod(Book* book,
+											struct returnRes res,
+											Client* curClient,
+											std::vector<std::string> words,
+											std::vector<struct returnRes>* result)
 {
 	std::vector<std::string> channels;
 
 	if (words.size() == 1)
-		res.msg = resultString("461 JOIN :Not enough parameters");
+		res.msg = resultString("461 " + words[0] + " :Not enough parameters");
 	else
 	{
 		channels = ft_split(words[1], ',');
 		for (size_t i = 0; i < channels.size(); i++)
 		{
 			if (channels[i][0] == '#' || channels[i][0] == '&')
+			{
 				book->joinClientChannel(channels[i], curClient);
-			// else
-			// 	// TODO
+				res.msg = ":" + curClient->getNick() + "!" + curClient->getUser();
+				res.msg += "@127.0.0.1 " + words[0] + " :" + channels[i];
+				std::string	msgForAll = res.msg;
+
+				res.msg += "\n:" + SERVER + " 331 " + curClient->getNick() + " ";
+				res.msg += channels[i] + " :No topic is set\n";
+
+				res.msg += ":" + SERVER + " 353 " + curClient->getNick() + " = ";
+				res.msg += channels[i] + " :";
+				for (size_t j = 0; j < book->getNickChanel(channels[i]).size(); j++)
+				{
+					if (j)
+						res.msg += " ";
+					res.msg += "@" + book->getNickChanel(channels[i])[j];
+				}
+
+				res.msg += "\n:" + SERVER + " 366 " + curClient->getNick() + " ";
+				res.msg += channels[i] + " :End of /NAMES list";
+
+				res.msg = resultString(res.msg);
+				res.users = curClient->getSession();
+				result->push_back(res);
+				
+				std::vector<Client *>	otherClients = *(book->getClientsChannel(channels[i]));
+				for (size_t k = 0; k < otherClients.size() - 1; k++)
+				{
+					res.msg = resultString(msgForAll);
+					res.users = otherClients[k]->getSession();
+					result->push_back(res);
+				}
+			}
+			else
+			{
+				res.msg = resultString("403 " + channels[i] + " :No such channel");
+				break ;
+			}
 		}
 	}
-	return res;
+	if (result->empty())
+	{
+		res.users = curClient->getSession();
+		result->push_back(res);
+	}
+	return result;
 }
 
-struct returnRes	kickMethod(Book* book, struct returnRes res,
-								Client* curClient, std::vector<std::string> words)
+std::vector<struct returnRes>*	kickMethod(Book* book, struct returnRes res,
+										Client* curClient,
+										std::vector<std::string> words,
+										std::vector<struct returnRes>* result)
 {
 	if (words.size() < 3)
-		res.msg = resultString("461 JOIN :Not enough parameters");
+		res.msg = resultString("461 " + words[0] + " :Not enough parameters");
 	else
 	{
-		// if (words[1])
+		if (book->checkChannel(words[1]))
+		{
+			if (book->checkHostChanel(words[1], curClient))
+			{
+				if (book->kickClientChannel(words[1], words[2]))
+				{
+					std::vector<Client *> otherClients = *(book->getClientsChannel(words[1]));
+					res.msg = ":" + curClient->getNick() + "!" + curClient->getUser();
+					res.msg += "@127.0.0.1 " + words[0] + " " + words[1];
+					res.msg += " " + words[2];
+					res.msg = resultString(res.msg);
+					for (size_t k = 0; k < otherClients.size(); k++)
+					{
+						res.users = otherClients[k]->getSession();
+						result->push_back(res);
+					}
+					//TODO add msg fro a kicked user
+					res.users = book->getSession(words[2]);
+					result->push_back(res);
+				}
+				else
+					res.msg = resultString("441 " + words[2] + " " + words[1]\
+											 + " :They aren't on that channel");
+			}
+			else
+				res.msg = resultString("482 " + words[1] + " :You're not channel operator");
+		}
+		else
+			res.msg = resultString("403 " + words[1] + " :No such channel");
 	}
+	if (result->empty())
+	{
+		res.users = curClient->getSession();
+		result->push_back(res);
+	}
+	return result;
 }
 
 std::vector<struct returnRes>*	checkData(Session* current, char* buf,
@@ -302,7 +381,9 @@ std::vector<struct returnRes>*	checkData(Session* current, char* buf,
 		else if (words[0] == "PRIVMSG" || words[0] == "NOTICE")
 			result = privMsgMethod(book, res, curClient, words, result);
 		else if (words[0] == "JOIN")
-			res = joinMethod(book, res, curClient, words);
+			result = joinMethod(book, res, curClient, words, result);
+		else if (words[0] == "KICK")
+			result = kickMethod(book, res, curClient, words, result);
 		else
 			res.msg = resultString("421 " + words[0] + " :Unknown command");
 	}

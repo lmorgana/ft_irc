@@ -31,9 +31,13 @@ class Book{
     bool checkNickInChannels(std::string nick, std::vector<std::string> name_channel); 
 
     void joinClientChannel(std::string name, Client *client);
-    bool kickClientChannel(std::string name, Client *client);
+    bool kickClientChannel(std::string name, std::string nick);
     std::vector<Client *> * getClientsChannel(std::string name);
     bool checkHostChanel(std::string name, Client *client);
+    bool checkChannel(std::string name);
+    std::vector<std::string> getNickChanel(std::string name);
+
+
 
     ~Book();
 	

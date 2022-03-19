@@ -89,9 +89,17 @@ void Book::joinClientChannel(std::string name, Client *client)
             channels[i]->addClient(client);
     }
 }
-bool Book::kickClientChannel(std::string name, Client *client)
+bool Book::kickClientChannel(std::string name, std::string nick)
 {
-    size_t size = channels.size();
+    Client *client = NULL;
+    size_t  size = channels.size();
+    for (size_t i = 0; i < size; i++)
+    {
+       if (clients[i]->getNick() == nick)
+           client = clients[i];
+    }
+    
+    size = channels.size();
     for(size_t i = 0; i < size; i++)
     {
         if (name == channels[i]->getName())
@@ -188,6 +196,29 @@ bool Book::checkHostChanel(std::string name, Client *client)
                 return true;
         }
     }
-
     return false;
 }
+bool Book::checkChannel(std::string name)
+{
+    size_t size = channels.size();
+    for (size_t i = 0; i < size; i++)
+    {
+        if (channels[i]->getName() == name)
+            return true;
+    }
+    return false;
+}
+std::vector<std::string> Book::getNickChanel(std::string name)
+    {
+        std::vector<std::string> vec;
+        std::vector<Client *> * vec_clients;
+        vec_clients = getClientsChannel(name);
+        if (!vec_clients)
+            return vec;
+        size_t size = (*vec_clients).size();
+        for (size_t i = 0; i < size; i++)
+        {
+            vec.push_back((*vec_clients)[i]->getNick());
+        }
+        return vec;
+    }
