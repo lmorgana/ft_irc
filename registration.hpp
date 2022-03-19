@@ -76,6 +76,35 @@ std::vector<std::string>	ft_split(std::string s, char c)
 	return res;
 }
 
+std::vector<std::string>	ft_split_mod(std::string s, char c)
+{
+	std::vector<std::string>	res;
+	std::string					tmp;
+
+	int count = 0;
+	int i = 0;
+	while (s[i])
+	{
+		while (s[i] == c && s[i])
+			i++;
+		if (res.size() >= 2)
+			break;
+		if (!s[i])
+			break ;
+		for (int k = 0; k < l_len(s, c, i); k++)
+			tmp += s[i + k];
+		res.push_back(tmp);
+		count++;
+		tmp.clear();
+		while (s[i] != c && s[i])
+			i++;
+	}
+	for (int j = i; s[j]; j++)
+		tmp += s[j];
+	res.push_back(tmp);
+	return res;
+}
+
 struct returnRes	nickMethod(Book* book, struct returnRes res,
 								Client* curClient, std::vector<std::string> words)
 {
@@ -152,13 +181,15 @@ struct returnRes	passMethod(Book* book, struct returnRes res,
 std::vector<struct returnRes>*	privMsgMethod(Book* book,
 											struct returnRes res,
 											Client* curClient,
-											std::vector<std::string> words,
+											std::string str,
 											std::vector<struct returnRes>* result)
 {
 	std::string					privMsg;
 	std::vector<std::string>	recipients;
 	std::vector<std::string>	nicks;
 	std::vector<std::string>	channels;
+
+	std::vector<std::string> words = ft_split_mod(str, ' ');
 
 	if (words.size() < 3)
 		res.msg = resultString("412 :No text to send");
@@ -201,21 +232,29 @@ std::vector<struct returnRes>*	privMsgMethod(Book* book,
 			{
 				res.msg = ":" + curClient->getNick() + "!" + curClient->getUser();
 				res.msg += "@127.0.0.1 " + words[0] + " " + recipients[i] + " ";
-				for (size_t i = 2; i < words.size(); i++)
-				{
-					res.msg += words[i];
-					if (i != words.size() - 1)
-						res.msg += " ";
-				}
-				res.msg = resultString(res.msg);
+				//FIXME send original msg
+				// for (size_t i = 2; i < words.size(); i++)
+				// {
+				// 	res.msg += words[i];
+				// 	if (i != words.size() - 1)
+				// 		res.msg += " ";
+				// }
+				res.msg += resultString(words[2]);
 				if (recipients[i][0] == '#' || recipients[i][0] == '&')
 				{
-					std::vector<Client*> *clientRes = book->getClientsChannel(recipients[i]);
-					for (size_t j = 0; j < clientRes->size(); j++)
+					std::vector<std::string> checkChannel;
+					checkChannel.push_back(recipients[i]);
+					if (book->checkNickInChannels(curClient->getNick(), checkChannel))
 					{
-						res.users = (*clientRes)[j]->getSession();
-						result->push_back(res);
+						std::vector<Client*> *clientRes = book->getClientsChannel(recipients[i]);
+						for (size_t j = 0; j < clientRes->size(); j++)
+						{
+							res.users = (*clientRes)[j]->getSession();
+							result->push_back(res);
+						}
 					}
+					else
+						res.msg = resultString("404 " + recipients[i] + " :Cannot send to channel");
 				}
 				else
 				{
@@ -253,14 +292,14 @@ std::vector<struct returnRes>*	joinMethod(Book* book,
 			if (channels[i][0] == '#' || channels[i][0] == '&')
 			{
 				book->joinClientChannel(channels[i], curClient);
-				res.msg = ":" + curClient->getNick() + "!" + curClient->getUser();
-				res.msg += "@127.0.0.1 " + words[0] + " :" + channels[i];
-				std::string	msgForAll = res.msg;
+				// res.msg = ":" + curClient->getNick() + "!" + curClient->getUser();
+				// res.msg += "@127.0.0.1 " + words[0] + " " + channels[i];
+				std::string	msgForAll;
 
-				res.msg += "\n:" + SERVER + " 331 " + curClient->getNick() + " ";
-				res.msg += channels[i] + " :No topic is set\n";
+				res.msg = "331 " + curClient->getNick() + " ";
+				res.msg += channels[i] + " :No topic is set";
 
-				res.msg += ":" + SERVER + " 353 " + curClient->getNick() + " = ";
+				res.msg += "\n353 " + curClient->getNick() + " = ";
 				res.msg += channels[i] + " :";
 				for (size_t j = 0; j < book->getNickChanel(channels[i]).size(); j++)
 				{
@@ -269,7 +308,7 @@ std::vector<struct returnRes>*	joinMethod(Book* book,
 					res.msg += "@" + book->getNickChanel(channels[i])[j];
 				}
 
-				res.msg += "\n:" + SERVER + " 366 " + curClient->getNick() + " ";
+				res.msg += "\n366 " + curClient->getNick() + " ";
 				res.msg += channels[i] + " :End of /NAMES list";
 
 				res.msg = resultString(res.msg);
@@ -279,6 +318,7 @@ std::vector<struct returnRes>*	joinMethod(Book* book,
 				std::vector<Client *>	otherClients = *(book->getClientsChannel(channels[i]));
 				for (size_t k = 0; k < otherClients.size() - 1; k++)
 				{
+					res.msg = "127.0.0.1 " + curClient->getNick() + " JOIN " + channels[i];
 					res.msg = resultString(msgForAll);
 					res.users = otherClients[k]->getSession();
 					result->push_back(res);
@@ -314,17 +354,19 @@ std::vector<struct returnRes>*	kickMethod(Book* book, struct returnRes res,
 			{
 				if (book->kickClientChannel(words[1], words[2]))
 				{
-					std::vector<Client *> otherClients = *(book->getClientsChannel(words[1]));
-					res.msg = ":" + curClient->getNick() + "!" + curClient->getUser();
-					res.msg += "@127.0.0.1 " + words[0] + " " + words[1];
-					res.msg += " " + words[2];
-					res.msg = resultString(res.msg);
-					for (size_t k = 0; k < otherClients.size(); k++)
-					{
-						res.users = otherClients[k]->getSession();
-						result->push_back(res);
-					}
+					// std::vector<Client *> otherClients = *(book->getClientsChannel(words[1]));
+					// res.msg = ":" + curClient->getNick() + "!" + curClient->getUser();
+					// res.msg += "@127.0.0.1 " + words[0] + " " + words[1];
+					// res.msg += " " + words[2];
+					// res.msg = resultString(res.msg);
+					// for (size_t k = 0; k < otherClients.size(); k++)
+					// {
+					// 	res.users = otherClients[k]->getSession();
+					// 	result->push_back(res);
+					// }
+
 					//TODO add msg fro a kicked user
+					res.msg = "You were kicked from " + words[1] + "\n";
 					res.users = book->getSession(words[2]);
 					result->push_back(res);
 				}
@@ -408,7 +450,7 @@ std::vector<struct returnRes>*	checkData(Session* current, char* buf,
 		else if (words[0] == "NICK")
 			res = nickMethod(book, res, curClient, words);
 		else if (words[0] == "PRIVMSG" || words[0] == "NOTICE")
-			result = privMsgMethod(book, res, curClient, words, result);
+			result = privMsgMethod(book, res, curClient, str, result);
 		else if (words[0] == "JOIN")
 			result = joinMethod(book, res, curClient, words, result);
 		else if (words[0] == "KICK")
