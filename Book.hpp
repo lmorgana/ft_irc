@@ -22,6 +22,7 @@ class Book{
     Client *getClient(Session *session);
     Session * getSession(std::string nick);
     Session * searchSession(std::string nick);
+    std::vector<Session *> getAllSession();
     bool searchBySession(Session *session);
     std::string getPassword();
     bool checkNicknames(std::string nick);

@@ -92,7 +92,7 @@ void Book::joinClientChannel(std::string name, Client *client)
 bool Book::kickClientChannel(std::string name, std::string nick)
 {
     Client *client = NULL;
-    size_t  size = channels.size();
+    size_t  size = clients.size();
     for (size_t i = 0; i < size; i++)
     {
        if (clients[i]->getNick() == nick)
@@ -222,3 +222,12 @@ std::vector<std::string> Book::getNickChanel(std::string name)
         }
         return vec;
     }
+
+std::vector<Session *> Book::getAllSession()
+{
+    std::vector<Session *> session;
+    size_t size = clients.size();
+    for (size_t i = 0; i < size; i++)
+        session.push_back(clients[i]->getSession());
+    return session;
+}
