@@ -1,7 +1,7 @@
 #ifndef Client_HPP
 #define Client_HPP
 
-#include "header.hpp"
+# include "header.hpp"
 
  class Session;
 
@@ -36,3 +36,4 @@
  };
 
  #endif
+ 

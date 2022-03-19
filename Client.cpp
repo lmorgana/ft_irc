@@ -1,4 +1,3 @@
-
 #include "Client.hpp"
 
 Client::Client(Session *session)
@@ -32,3 +31,4 @@ void Client::setPass()
  {
      _authorized = true;
  }
+ 

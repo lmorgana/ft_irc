@@ -17,14 +17,17 @@ Client * Channel::getHostChannel()
         return (*clients)[0];
     return NULL;
 }
+
 std::vector<Client *> * Channel::getClients()
 {
     return clients;
 }
+
 bool Channel::kickClient(Client *client)
 {
     size_t size = clients->size();
     int index = -1;
+
     for (size_t i = 0; i < size; i++)
     {
         if ((*clients)[i] == client)
@@ -42,6 +45,7 @@ void Channel::addClient(Client *client)
 {
     size_t size = clients->size();
     bool flag = true;
+
     for (size_t i = 0; i < size; i++)
     {
         if ((*clients)[i] == client)
@@ -61,9 +65,11 @@ bool Channel::searchClient(Client *client)
     }
     return false;
 }
+
  bool Channel::searchNick(std::string nick)
  {
     size_t size = clients->size();
+
     for (size_t i = 0; i < size; i++)
     {
         if ((*clients)[i]->getNick() == nick)
