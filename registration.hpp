@@ -137,7 +137,10 @@ struct returnRes	passMethod(Book* book, struct returnRes res,
 			res.msg = resultString("461 PASS :Not enough parameters");
 		else
 		{
-			if (words[1] == book->getPassword())
+			std::string pas = words[1];
+			if (pas == book->getPassword()
+				|| ((pas[0] == ':')
+				&& (pas.substr(1, pas.size() - 1)) == book->getPassword()))
 				curClient->setPass();
 		}
 	}
