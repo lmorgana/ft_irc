@@ -231,3 +231,9 @@ std::vector<Session *> Book::getAllSession()
         session.push_back(clients[i]->getSession());
     return session;
 }
+
+//added
+std::vector<Client *> Book::getAllClients()
+{
+    return clients;
+}

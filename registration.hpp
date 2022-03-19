@@ -131,7 +131,7 @@ struct returnRes	userMethod(struct returnRes res, Client* curClient,
 struct returnRes	passMethod(Book* book, struct returnRes res,
 								Client* curClient, std::vector<std::string> words)
 {
-	if (words[0] == "PASS")
+	if (!words.empty() && words[0] == "PASS")
 	{
 		if (words.size() == 1)
 			res.msg = resultString("461 PASS :Not enough parameters");
@@ -344,11 +344,36 @@ std::vector<struct returnRes>*	kickMethod(Book* book, struct returnRes res,
 	return result;
 }
 
+std::vector<struct returnRes>*	botMethod(Book* book, struct returnRes res,
+										std::vector<struct returnRes>* result)
+{
+	std::vector<Client *> clients = book->getAllClients();
+	for (size_t i = 0; i < clients.size(); i++)
+	{
+		res.msg = ":" + clients[i]->getNick() + "!" + clients[i]->getUser();
+		res.msg += "@127.0.0.1 PRIVMSG " + clients[i]->getNick() + " :";
+		res.msg += "AHAHA BOT hacked you!!!\n";
+		res.msg += "       _  __________=__\n";
+		res.msg += "        \\@([____]_____()\n";
+		res.msg += "       _/\\|-[____]\n";
+		res.msg += "      /     /(( )\n";
+		res.msg += "     /____|'----'\n";
+		res.msg += "     \\____/\n";
+		res.msg = resultString(res.msg);
+		res.users = clients[i]->getSession();
+		result->push_back(res);
+	}
+	return result;
+}
+
 std::vector<struct returnRes>*	checkData(Session* current, char* buf,
 										Book* book, std::vector<struct returnRes>* result)
 {
 	std::string str = buf;
-	str = str.substr(0, str.length() - 1);
+	if (str.length() >= 2 && str.substr(str.length() - 2, 2) == "\r\n")
+		str = str.substr(0, str.length() - 2);
+	else
+		str = str.substr(0, str.length() - 1);
 	Client*	curClient = book->getClient(current);
 	std::vector<std::string> words = ft_split(str, ' ');
 
@@ -376,7 +401,9 @@ std::vector<struct returnRes>*	checkData(Session* current, char* buf,
 	}
 	else if (curClient->getAuthorized())
 	{
-		if (words[0] == "NICK")
+		if (words.empty())
+			res.msg = resultString("421 :Unknown command");
+		else if (words[0] == "NICK")
 			res = nickMethod(book, res, curClient, words);
 		else if (words[0] == "PRIVMSG" || words[0] == "NOTICE")
 			result = privMsgMethod(book, res, curClient, words, result);
@@ -384,6 +411,8 @@ std::vector<struct returnRes>*	checkData(Session* current, char* buf,
 			result = joinMethod(book, res, curClient, words, result);
 		else if (words[0] == "KICK")
 			result = kickMethod(book, res, curClient, words, result);
+		else if (words[0] == "BOT")
+			result = botMethod(book, res, result);
 		else
 			res.msg = resultString("421 " + words[0] + " :Unknown command");
 	}

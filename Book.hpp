@@ -38,7 +38,8 @@ class Book{
     bool checkChannel(std::string name);
     std::vector<std::string> getNickChanel(std::string name);
 
-
+    //added
+    std::vector<Client *> getAllClients();
 
     ~Book();
 	
