@@ -15,17 +15,36 @@ Session::~Session()
 		delete[] name;
 }
 
+int get_line(int fd, char *buffer, int len_buffer)
+{
+	char ch;
+	int i = 0;
+	int rc;
+
+	while ((rc = read(fd, &ch, 1)) > 0)
+	{
+		if (i < len_buffer && ch != '\n')
+			buffer[i] = ch;
+		else if (ch == '\n')
+		{
+			buffer[i] = ch;
+			break;
+		}
+		i++;
+	}
+	return (rc);
+}
+
 void Session::Handle(bool r)
 {
 	std::vector<struct returnRes> *result = new std::vector<struct returnRes>;
 	if (r)
 	{
-		int rc = read(GetFd(), buffer, sizeof(buffer));
+		int rc = get_line(GetFd(), buffer, sizeof(buffer));
 		if (rc > 0)
 		{
+			std::cout << "buffer: \"" << buffer << "\"" << "strlen" << strlen(buffer) << std::endl;
 			result = checkData(this, buffer, the_master->getBook(), result);
-//			the_master->send_msg(result->msg.c_str(), result->users);
-			std::cout << (*result)[0].msg << std::endl;
 			the_master->send_msg(result);
 		}
 		else if (rc == 0)

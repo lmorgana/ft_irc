@@ -4,7 +4,7 @@
 #include "server.hpp"
 
 
-#define MAX_PORT 10000
+#define MAX_PORT 49151
 #define MIN_PORT 1023
 
 bool is_digit(char *str)
