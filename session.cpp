@@ -1,6 +1,6 @@
 
 #include "session.hpp"
-#include "registration.hpp"
+#include "parser.hpp"
 #include <cstring>
 
 
@@ -37,7 +37,8 @@ int get_line(int fd, char *buffer, int len_buffer)
 
 void Session::Handle(bool r)
 {
-	std::vector<struct returnRes> *result = new std::vector<struct returnRes>;
+	std::vector<struct returnRes> result_buff;
+	std::vector<struct returnRes> *result = &result_buff;
 	if (r)
 	{
 		int rc = get_line(GetFd(), buffer, sizeof(buffer));
@@ -58,7 +59,6 @@ void Session::Handle(bool r)
 			return ;
 		}
 		bzero(buffer, strlen(buffer));
-		delete result;
 	}
 }
 

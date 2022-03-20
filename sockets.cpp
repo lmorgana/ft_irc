@@ -32,7 +32,6 @@ bool EventSelector::Remove(FdHandler *h)
 {
 	int fd = h->GetFd();
 
-	//needed to be modify
 	if(fd >= int(fd_array.size()) || fd_array[fd] != h)
 		return false;
 	fd_array[fd] = nullptr;

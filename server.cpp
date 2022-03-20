@@ -48,6 +48,7 @@ void Server::RemoveSession(Session *s, const char *msg)
 {
 	std::cout << msg << std::endl;
 	the_selector->Remove(s);
+	book.kickClient(s);
 	item **p;
 	for(p = &first; *p; p = &((*p)->next)) {
 		if((*p)->s == s) {
@@ -62,7 +63,7 @@ void Server::RemoveSession(Session *s, const char *msg)
 
 void Server::Handle(bool r)
 {
-	if(!r)       // must not happen, ever!
+	if(!r)
 		return;
 	int sd;
 	struct sockaddr_in addr;
