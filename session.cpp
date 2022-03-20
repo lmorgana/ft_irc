@@ -54,7 +54,7 @@ void Session::Handle(bool r)
 			return ;
 		}
 		else
-		{	// -1 can't read
+		{
 			the_master->RemoveSession(this, "*** server close session ***");
 			delete result;
 			return ;
