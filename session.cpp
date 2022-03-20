@@ -37,8 +37,7 @@ int get_line(int fd, char *buffer, int len_buffer)
 
 void Session::Handle(bool r)
 {
-	std::vector<struct returnRes> result_buff;
-	std::vector<struct returnRes> *result = &result_buff;
+	std::vector<struct returnRes> *result = new std::vector<struct returnRes>;
 	if (r)
 	{
 		int rc = get_line(GetFd(), buffer, sizeof(buffer));
@@ -51,14 +50,17 @@ void Session::Handle(bool r)
 		else if (rc == 0)
 		{
 			the_master->RemoveSession(this, EXIT_MSG);
+			delete result;
 			return ;
 		}
 		else
 		{	// -1 can't read
 			the_master->RemoveSession(this, "*** server close session ***");
+			delete result;
 			return ;
 		}
 		bzero(buffer, strlen(buffer));
+		delete result;
 	}
 }
 
