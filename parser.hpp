@@ -15,26 +15,6 @@
 
 const std::string SERVER = "blueCat";
 
-// class Book
-// {
-// public:
-
-// 	Client* getClient(Session *current) {}
-// 	std::string	getPassword() {}
-// 	bool	checkNicknames(std::string nick) {}
-// };
-
-// std::map<std::string, std::string> errorMsg(Book book, std::string str)
-// {
-// 	std::map<std::string, std::string>	error;
-
-// 	error["451"] = ":You have not registered";
-// 	error["461"] = str + " :Not enough parameters";
-// 	error["462"] = ":You may not reregister";
-
-// 	return error;
-// }
-
 std::string	resultString(std::string str)
 {
 	if (!str.empty())
@@ -188,9 +168,9 @@ std::vector<struct returnRes>*	privMsgMethod(Book* book,
 	std::vector<std::string>	recipients;
 	std::vector<std::string>	nicks;
 	std::vector<std::string>	channels;
+	std::vector<std::string>	words;
 
-	std::vector<std::string> words = ft_split_mod(str, ' ');
-
+	words = ft_split_mod(str, ' ');
 	if (words.size() < 3)
 		res.msg = resultString("412 :No text to send");
 	else
@@ -232,13 +212,6 @@ std::vector<struct returnRes>*	privMsgMethod(Book* book,
 			{
 				res.msg = ":" + curClient->getNick() + "!" + curClient->getUser();
 				res.msg += "@127.0.0.1 " + words[0] + " " + recipients[i] + " ";
-				//FIXME send original msg
-				// for (size_t i = 2; i < words.size(); i++)
-				// {
-				// 	res.msg += words[i];
-				// 	if (i != words.size() - 1)
-				// 		res.msg += " ";
-				// }
 				res.msg += resultString(words[2]);
 				if (recipients[i][0] == '#' || recipients[i][0] == '&')
 				{
@@ -292,8 +265,6 @@ std::vector<struct returnRes>*	joinMethod(Book* book,
 			if (channels[i][0] == '#' || channels[i][0] == '&')
 			{
 				book->joinClientChannel(channels[i], curClient);
-				// res.msg = ":" + curClient->getNick() + "!" + curClient->getUser();
-				// res.msg += "@127.0.0.1 " + words[0] + " " + channels[i];
 				std::string	msgForAll;
 
 				res.msg = "331 " + curClient->getNick() + " ";
@@ -354,18 +325,6 @@ std::vector<struct returnRes>*	kickMethod(Book* book, struct returnRes res,
 			{
 				if (book->kickClientChannel(words[1], words[2]))
 				{
-					// std::vector<Client *> otherClients = *(book->getClientsChannel(words[1]));
-					// res.msg = ":" + curClient->getNick() + "!" + curClient->getUser();
-					// res.msg += "@127.0.0.1 " + words[0] + " " + words[1];
-					// res.msg += " " + words[2];
-					// res.msg = resultString(res.msg);
-					// for (size_t k = 0; k < otherClients.size(); k++)
-					// {
-					// 	res.users = otherClients[k]->getSession();
-					// 	result->push_back(res);
-					// }
-
-					//TODO add msg fro a kicked user
 					res.msg = "You were kicked from " + words[1] + "\n";
 					res.users = book->getSession(words[2]);
 					result->push_back(res);
@@ -462,18 +421,12 @@ std::vector<struct returnRes>*	checkData(Session* current, char* buf,
 	}
 	else
 		res = passMethod(book, res, curClient, words);
-
-	//FIXME when there are several users
-	// if (!res.users)
-	// 	res.users = current;
-
-	//FIXME when there are several users
 	if (result->empty())
 	{
 		res.users = current;
 		result->push_back(res);
 	}
-
+	
 	std::cout << "Pass: " << curClient->getPass() << std::endl;
 	std::cout << "Nick: " << curClient->getNick() << std::endl;
 	std::cout << "User: " << curClient->getUser() << std::endl;
